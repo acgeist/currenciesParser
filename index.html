@@ -8,22 +8,86 @@
     <meta name="keywords" content="keyword1, keyword2, keyword3">
     <meta name="author" content="Andrew Geist">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <style>
-        .thumb {
-            height: 75px;
-            border: 1px solid #000;
-            margin: 10px 5px 0 0;
-        }
-    </style>
 </head>
 
 <body>
-    <h1>Index.html</h1>
-    <input type="file" id="files" name="files[]" multiple />
-    <output id="list"></output>
-    <p id="hConsole"></p>
-    <p id="contents"></p>
-    <script src="parse.js"></script>
+    Select a text file:
+    <input type="file" id="fileInput">
+    <div id="fileDisplayArea"></div>
+    <div id="names"></div>
+    <div id="dates"></div>
+    <div id="physDue"></div>
+    <script>
+        /* 
+        All credit for the file-loading code goes to Matt West of the
+        treehouse blog.  Ref: http://blog.teamtreehouse.com/reading-files-using-the-html5-filereader-api,
+        http://codepen.io/matt-west/pen/KjEHg 
+        */
+        window.onload = function () {
+            var fileInput = document.getElementById('fileInput');
+            var fileDisplayArea = document.getElementById('fileDisplayArea');
+
+            fileInput.addEventListener('change', function (e) {
+                var file = fileInput.files[0];
+
+                if (file.type.match(/text.*/)) {
+                    var reader = new FileReader();
+
+                    reader.onload = function (e) {
+                        // fileDisplayArea.innerText = reader.result;
+                        doStuffWithXml(reader.result);
+                    }
+
+                    reader.readAsText(file);
+                } else {
+                    fileDisplayArea.innerText = "File not supported!"
+                }
+            });
+        }
+
+        function doStuffWithXml(xml){
+            // printUniqueNames(xml, "names");
+            // printAllDates(xml, "dates");
+            printPhysDueDate(xml, "physDue");
+        }
+
+        function printPhysDueDate(inputText, htmlId){
+            document.getElementById(htmlId).innerHTML += "<h2>Physiological Due Date</h2>";
+            var outputArr = inputText.match(/NAME: [A-Z]*,[^]*?PHYSIOLOGICAL DUE DATE: .{9}/gi);
+            for (x in outputArr) console.log(outputArr[x]);
+            document.getElementById(htmlId).innerHTML += 
+                outputArr[0].replace(/(?:NAME: )([A-Z]*),(?:[^]*?PHYSIOLOGICAL DUE DATE: )(.{9})/i, '$1: $2') + "<br>";
+            for (var i=1; i<outputArr.length; i++){
+                if (outputArr[i].replace(/(?:NAME: )([A-Z]*),(?:[^]*?PHYSIOLOGICAL DUE DATE: )(.{9})/i, '$1: $2') !== 
+                    outputArr[i-1].replace(/(?:NAME: )([A-Z]*),(?:[^]*?PHYSIOLOGICAL DUE DATE: )(.{9})/i, '$1: $2')){
+                    //console.log(outputArr[i] + "!== " + outputArr[i-1])
+                    document.getElementById(htmlId).innerHTML += 
+                    outputArr[i].replace(/(?:NAME: )([A-Z]*),(?:[^]*?PHYSIOLOGICAL DUE DATE: )(.{9})/i, '$1: $2') + "<br>";
+                }                
+            }
+        }
+
+        function printUniqueNames(inputText, htmlId) {
+            var outputArr = inputText.match(/(?:NAME: [a-z]+, [a-z]+ [a-z])/gi);
+            document.getElementById(htmlId).innerHTML = 
+                outputArr[0].match(/[a-z]+, [a-z]+ [a-z]/i) + "<br>";
+            for (var i=1; i<outputArr.length; i++){
+                if (outputArr[i] !== outputArr[i-1]){
+                    document.getElementById(htmlId).innerHTML += 
+                    outputArr[i].match(/[a-z]+, [a-z]+ [a-z]/i) + "<br>";
+                }                
+            }
+        }
+
+        function printAllDates(inputText, htmlId){
+            var outputArr = inputText.match(/\d{2} (JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC) \d{2}/gi);
+            console.log(outputArr.length + " dates!")
+            for (var i=0; i<outputArr.length; i++){
+                document.getElementById(htmlId).innerHTML +=
+                    outputArr[i] + ", ";
+            }
+        }
+    </script>
 </body>
 
 </html>
