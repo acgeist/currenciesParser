@@ -1,6 +1,7 @@
 "use strict";
 
-function monthAbbrToNum(input, isZeroSubscript = false) {
+function monthAbbrToNum(input, isZeroSubscript) {
+  isZeroSubscript = arguments.length === 1 ? false : isZeroSubscript;
   var output;
   if (!/[A-Z]{3}/i.test(input)) {
     output = "Error in function monthAbbrToNum: input received " +
@@ -59,7 +60,8 @@ function monthAbbrToNum(input, isZeroSubscript = false) {
   }
 }
 
-function numToMonAbbr(input, isZeroSubscript = false) {
+function numToMonAbbr(input, isZeroSubscript) {
+  isZeroSubscript = arguments.length === 1 ? false : isZeroSubscript;
   var output;
   if (!/\d+/i.test(input)) {
     output = "Error in function monthAbbrToNum: input received " +
