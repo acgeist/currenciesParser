@@ -63,7 +63,7 @@ function monthAbbrToNum(input, isZeroSubscript) {
 function numToMonAbbr(input, isZeroSubscript) {
   isZeroSubscript = arguments.length === 1 ? false : isZeroSubscript;
   var output;
-  if (!/\d+/i.test(input)) {
+  if (!/\d{1,2}/i.test(input)) {
     output = "Error in function monthAbbrToNum: input received " +
       "did not match expected format /\d+/i.\n" +
       "(/\d+/i.test(" + input + ") returned false.)";
@@ -116,21 +116,30 @@ function numToMonAbbr(input, isZeroSubscript) {
   return output;
 }
 
-function NOW_MINUS_ONE_WEEK() {
+function NOW_PLUS_ONE_WEEK() {
   return new Date(Date.now()
-    .valueOf() + 24 * 60 * 60 * 1000);
+  .valueOf() + 7 * 24 * 60 * 60 * 1000);
 }
 
 function makeDate(ddMmmYy) {
   var xDay, xMon, xYr;
-  xDay = parseInt(ddMmmYy.replace(
-    /<td class="due">(\d\d) ([A-Z]{3}) (\d\d)<\/td>/i, "$1"), 10);
+  /* Reference http://stackoverflow.com/a/4090577/7366582 for discussion
+  of explicit conversion of the date and year to numbers.  +"42" is
+  shorthand for Number("42") and, in this particular situation, 
+  accomplishes roughly the same thing as ParseInt("42", 10). */
+  xDay = +ddMmmYy.replace(/<td class="due">(\d\d) ([A-Z]{3}) (\d\d)<\/td>/i, "$1");
   xMon = monthAbbrToNum(ddMmmYy.replace(
     /<td class="due">(\d\d) ([A-Z]{3}) (\d\d)<\/td>/i, "$2"), true);
-  xYr = parseInt(ddMmmYy.replace(
-      /<td class="due">(\d\d) ([A-Z]{3}) (\d\d)<\/td>/i, "$3"), 10) +
-    2000;
+  xYr = +ddMmmYy.replace(
+      /<td class="due">(\d\d) ([A-Z]{3}) (\d\d)<\/td>/i, "$3") + 2000;
   return new Date(xYr, xMon, xDay);
+}
+
+/* Take in a Date object and convert 
+it to a string of format "DD MMM YY". */
+function dateToDd_Mmm_YyString(dateIn){
+  return dateIn.toString().toUpperCase().replace(
+    /.*([A-Z]{3}) (\d\d) \d{2}(\d{2}).*/i, "$2 $1 $3");
 }
 
 function colorize(html) {
@@ -147,7 +156,7 @@ function colorize(html) {
         /^\d [A-Z]{3} \d\d/i, "0$&");
       if (xDate <= Date.now()) {
         return "<td style=\"color:red\">" + dateString + "</td>";
-      } else if (xDate <= NOW_MINUS_ONE_WEEK()) {
+      } else if (xDate <= NOW_PLUS_ONE_WEEK()) {
         return "<td style=\"color:Gold\">" + dateString + "</td>";
       } else {
         return "<td>" + dateString + "</td>";
@@ -159,10 +168,14 @@ function colorize(html) {
 function printAll(xml) {
   var temp, taskName, re, currName;
   var taskNames = ["ACBT", "PREC APP", "A/R DAY", "SEPT", "DAY LANDING",
-        "FORM LNDG"];
+        "FORM LNDG", "DEGRAD/DEN GPS", "LOWAT"];
   var htmlOut = "";
+  /* Step one: slice the xml into an array of pilots.  Each array member
+  contains from the first time that pilot's name is mentioned to the 
+  page number declaration on the last page that has their name */
   var out = xml.match(/NAME: ([A-Z]+) ?,[^]*NAME: \1[^]*?PAGE/gi);
   for (var i = 0; i < out.length; i++) {
+    console.log(out[i]);
     currName = out[i].replace(
       /NAME: ([A-Z]+) ?,[^]*NAME: \1[^]*?PAGE/i, "$1");
     htmlOut += "<h3>" + currName + "</h3>";
@@ -192,7 +205,7 @@ function printAll(xml) {
             "</td><td class=\"due\">" + temp.match(
               /\d\d [A-Z]{3} \d\d/g)[1] + "</td>" :
             (
-              Window.alert("Error while trying to print dates. " +
+              window.alert("Error while trying to print dates. " +
                 "Search the code for \"Number of dates found = \""
               ),
               "Number of dates found = " + temp.match(
@@ -217,8 +230,10 @@ $("#fileInput")[0].addEventListener("change", function () {
     reader.onload = function () {
       $("#fileData")[0].innerHTML = "File Name: " + file.name +
         "<br>File " +
-        "Type: " + file.type + "<br>Last Modified: " + file.lastModifiedDate +
-        "<br>File Size: " + Math.floor(file.size / 1024) + "kB";
+        "Type: " + file.type + "<br>Last Modified: " + dateToDd_Mmm_YyString(file.lastModifiedDate) +
+        "<br>File Size: " + (file.size / 1048576).toFixed(3) + "MB";
+        /* Is a kilobyte 1000 or 1024 bytes?  Yes.
+        https://en.wikipedia.org/wiki/Kilobyte*/
       printAll(reader.result);
       $("#fileInput").attr("hidden", true);
     };
