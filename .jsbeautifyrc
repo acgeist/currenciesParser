@@ -1,7 +1,7 @@
 {
 	"eol":"\n",
 	"indent_char":" ",
-	"indent_size": 4,
+	"indent_size": 2,
 	"max_preserve_newlines": 2,
 	"preserve_newlines": true,
 	"keep_array_indentation": true,
@@ -9,7 +9,7 @@
 	"wrap_line_length": 80,
 	"end_with_newline": true,
 	"brace_style": "collapse,preserve-inline",
-	"indent_scripts": "normal",
+	"indent_scripts": "separate",
 	"unformatted": ["a", "abbr", "area", "audio", "b", "bdi", "bdo", "br", "button", "canvas", "cite", "code", "data",
 		"datalist", "del", "dfn", "em", "embed", "i", "iframe", "img", "input", "ins", "kbd", "keygen", "label", "map",
 		"mark", "math", "meter", "noscript", "object", "output", "progress", "q", "ruby", "s", "samp", "select", "small",
