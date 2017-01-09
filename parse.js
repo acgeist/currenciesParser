@@ -1,11 +1,14 @@
 "use strict";
 
+const SHOW_PHA = true;
+const SHOW_ROBD = true;
+const ALL_TASK_IDS = ["AE03","AP00","AP01","AP02","AP03","AP11","AP13","AP21","AP30","AR01","AR02","DP02","EC01","EC02","EC04","EC05","EC08","GS03","LD00","LD01","LD02","LD04","LD19","LE00","LE03","LE06","MF07","MF11","MF15","MF16","MF19","MF20","MF21","MF29","MF30","MF34","MF38","MF39","MF40","MF41","MF42","MF43","MF46","MF48","MF49","MG69","MG71","MT01","MT14","MT17","MT20","RA03","RA05","RA06","RA07","RA12","RA13","RA19","RA20","RA21","RA23","RA26","RA33","RA46","RA49","RA72","RA73","RA84","RA85","SC02","SC11","SD03","SQ04","SQ09","SQ13","SQ14","SQ15","SQ18","SQ19","SQ23","SR00","SR15","SR16","SR17","SR18","SR18C","SR18T","SR19","SR19C","SR19T","SR27","SR28","SR28C","SR33","SR45","SR45C","SR45T","SR72","SR72C","SR72T","ST00","SX06","SX07","SX08","SX08C","SX08T","SX10","TE01","TO03","VV02","VV03","WD00","WD31","WD47","FH03","FH04","FH05","FH06","FH09","ME14","RA28","RA29","RA35","RA36","RA38","RA39","RA40","RA41","RA91","WD11","WD12","WD14","WD15","WD22","WD23","WD24","WD25","WD26","WD28","WD45","WD46","WD53","WD56","AA01","AA03","AA11","AA21","GA02","GA06","GA07","GA09","GA12","GA14","GA17","GA23","GA39","GA40","GA43","GS06","GS25","GS26","GS47","IE05","LL01","LL02","LL04","LL05","LL06","LL07","PP12","PP13","SS01","SS02","SS03","SS05","SS06","SS07A","SS07C","SS07E","SS07P","SS07S","SS09","SV86A","FF00","FF01","FF02","FF11","FF12","FF21","FF22","EI02","EI03","GA03","SS20","SV93A","GA22","HH60G","LL03D","LL06D","SE55","SS08","SS30","SS32","SC12","RA52","SR10","ME10","MG70","SR12","LE09","ME28","MT12","SR07","SR07C","SR07T","ME43","ME44","ME45","ME46","ME47","MF18","MF44","MF45","MG77","MT15","RA77","RA78","RA79","RA80","RA81","RA82","RB11","SR09","SR23","SR23C","SR23T","SR24","SR24C","SR24T","WD27","LE08","GS28","GS29","SC01","SQ10","TF02","TF03","TF04","GS05","AR00","WD20","SR14","WD29","WD51","WD52","WD54","WD55","WD57"];
+
 function monthAbbrToNum(input, isZeroSubscript) {
   isZeroSubscript = arguments.length === 1 ? false : isZeroSubscript;
   var output;
   if (!/[A-Z]{3}/i.test(input)) {
-    output = "Error in function monthAbbrToNum: input received " +
-      "did not match expected format /[A-Z]{3}/.\n" +
+    output = "Error in function monthAbbrToNum: input received " + "did not match expected format /[A-Z]{3}/.\n" +
       "(/[A-Z]{3}/i.test(" + input + ") returned false.)";
   } else {
     switch (input.toLowerCase()) {
@@ -46,14 +49,12 @@ function monthAbbrToNum(input, isZeroSubscript) {
       output = 12;
       break;
     default:
-      output = "Error in function monthAbbrToNum: " + input +
-        "not recognized as a valid month.";
+      output = "Error in function monthAbbrToNum: " + input + "not recognized as a valid month.";
     }
   }
   if (typeof (output) === "string") {
-    window.alert("function monthAbbrToNum(" + input + ", " +
-      isZeroSubscript + ") is outputting " + output + ", which is a " +
-      "string (vice a number). ");
+    window.alert("function monthAbbrToNum(" + input + ", " + isZeroSubscript + ") is outputting " + output +
+      ", which is a " + "string (vice a number). ");
     return output;
   } else if (typeof (output) === "number") {
     return isZeroSubscript ? output - 1 : output;
@@ -64,8 +65,7 @@ function numToMonAbbr(input, isZeroSubscript) {
   isZeroSubscript = arguments.length === 1 ? false : isZeroSubscript;
   var output;
   if (!/\d{1,2}/i.test(input)) {
-    output = "Error in function monthAbbrToNum: input received " +
-      "did not match expected format /\d+/i.\n" +
+    output = "Error in function monthAbbrToNum: input received " + "did not match expected format /\d+/i.\n" +
       "(/\d+/i.test(" + input + ") returned false.)";
   } else {
     if (isZeroSubscript) {
@@ -109,8 +109,7 @@ function numToMonAbbr(input, isZeroSubscript) {
       output = "DEC";
       break;
     default:
-      output = "Error in function numToMonAbbr: " + input +
-        "not recognized as a valid month.";
+      output = "Error in function numToMonAbbr: " + input + "not recognized as a valid month.";
     }
   }
   return output;
@@ -118,109 +117,141 @@ function numToMonAbbr(input, isZeroSubscript) {
 
 function NOW_PLUS_ONE_WEEK() {
   return new Date(Date.now()
-  .valueOf() + 7 * 24 * 60 * 60 * 1000);
+    .valueOf() + 7 * 24 * 60 * 60 * 1000);
 }
 
-function makeDate(ddMmmYy) {
+function dD_Mmm_YyStringToDate(ddMmmYy) {
   var xDay, xMon, xYr;
   /* Reference http://stackoverflow.com/a/4090577/7366582 for discussion
   of explicit conversion of the date and year to numbers.  +"42" is
   shorthand for Number("42") and, in this particular situation, 
   accomplishes roughly the same thing as ParseInt("42", 10). */
   xDay = +ddMmmYy.replace(/<td class="due">(\d\d) ([A-Z]{3}) (\d\d)<\/td>/i, "$1");
-  xMon = monthAbbrToNum(ddMmmYy.replace(
-    /<td class="due">(\d\d) ([A-Z]{3}) (\d\d)<\/td>/i, "$2"), true);
-  xYr = +ddMmmYy.replace(
-      /<td class="due">(\d\d) ([A-Z]{3}) (\d\d)<\/td>/i, "$3") + 2000;
+  xMon = monthAbbrToNum(ddMmmYy.replace(/<td class="due">(\d\d) ([A-Z]{3}) (\d\d)<\/td>/i, "$2"), true);
+  xYr = +ddMmmYy.replace(/<td class="due">(\d\d) ([A-Z]{3}) (\d\d)<\/td>/i, "$3") + 2000;
   return new Date(xYr, xMon, xDay);
 }
-
 /* Take in a Date object and convert 
 it to a string of format "DD MMM YY". */
-function dateToDd_Mmm_YyString(dateIn){
-  return dateIn.toString().toUpperCase().replace(
-    /.*([A-Z]{3}) (\d\d) \d{2}(\d{2}).*/i, "$2 $1 $3");
+function dateToDd_Mmm_YyString(dateIn) {
+  return dateIn.toString()
+    .toUpperCase()
+    .replace(/.*([A-Z]{3}) (\d\d) \d{2}(\d{2}).*/i, "$2 $1 $3");
 }
 
 function colorize(html) {
-  var xDates = html.replace(
-    /<td class="due">(\d\d) ([A-Z]{3}) (\d\d)<\/td>/gi,
-    function (capture) {
-      var xDate = makeDate(capture);
-      var dateString = xDate.getDate() + " " +
-        numToMonAbbr(xDate.getMonth(), true) + " " +
-        xDate.getFullYear();
-      dateString = dateString.replace(
-        /(\d+ [A-Z]{3} )\d\d(\d\d)/i, "$1$2");
-      dateString = dateString.replace(
-        /^\d [A-Z]{3} \d\d/i, "0$&");
-      if (xDate <= Date.now()) {
-        return "<td style=\"color:red\">" + dateString + "</td>";
-      } else if (xDate <= NOW_PLUS_ONE_WEEK()) {
-        return "<td style=\"color:Gold\">" + dateString + "</td>";
-      } else {
-        return "<td>" + dateString + "</td>";
-      }
-    });
+  var xDates = html.replace(/<td class="due">(\d\d) ([A-Z]{3}) (\d\d)<\/td>/gi, function (capture) {
+    var xDate = dD_Mmm_YyStringToDate(capture);
+    var dateString = xDate.getDate() + " " + numToMonAbbr(xDate.getMonth(), true) + " " + xDate.getFullYear();
+    dateString = dateString.replace(/(\d+ [A-Z]{3} )\d\d(\d\d)/i, "$1$2");
+    dateString = dateString.replace(/^\d [A-Z]{3} \d\d/i, "0$&");
+    if (xDate <= Date.now()) {
+      return "<td class=\"text-danger\">" + dateString + "</td>";
+    } else if (xDate <= NOW_PLUS_ONE_WEEK()) {
+      return "<td class=\"text-warning\">" + dateString + "</td>";
+    } else {
+      return "<td>" + dateString + "</td>";
+    }
+  });
   return xDates;
 }
+/* Generate a list of all the unique task ids found 
+in the file. */
+function getAllTaskIds(xml) {
+  var outputStr = "\"";
+  var modXml = xml.replace(/(<\/?(TD|TR|TH|TABLE|P|DIV)\/?>)|\n+/ig, " ")
+    .replace(/\s{2,}/g, " ");
+  modXml = modXml.match(/ [A-Z]{2}\d{2}[A-Z]? /gi);
+  for (var i = 0; i < modXml.length; i++) {
+    modXml[i] = modXml[i].replace(/\s*/g,"");
+    if (!outputStr.includes(modXml[i].valueOf())) {
+      outputStr += modXml[i] + "\",\"";
+    }
+  }
+  console.log(outputStr);
+}
 
-function printAll(xml) {
-  var temp, taskName, re, currName;
-  var taskNames = ["ACBT", "PREC APP", "A/R DAY", "SEPT", "DAY LANDING",
-        "FORM LNDG", "DEGRAD/DEN GPS", "LOWAT"];
+function printCurrencies(xml, taskNames) {
+  var dateTds, taskName, re, currName;
   var htmlOut = "";
-  /* Step one: slice the xml into an array of pilots.  Each array member
-  contains from the first time that pilot's name is mentioned to the 
-  page number declaration on the last page that has their name */
+  xml = xml.replace(/(<\/?(TD|TR|TH|TABLE|P|DIV)\/?>)|\n+/ig, " ")
+    .replace(/\s+/g, " ");
+  /* Slice the xml into an array of pilots.  Each array member contains from 
+  the first time that pilot's name is mentioned to the page number declaration 
+  on the last page that has their name.  Read up on greedy vs. reluctant to 
+  see how it works and use https://regexper.com to visualize it. */
   var out = xml.match(/NAME: ([A-Z]+) ?,[^]*NAME: \1[^]*?PAGE/gi);
   for (var i = 0; i < out.length; i++) {
-    console.log(out[i]);
-    currName = out[i].replace(
-      /NAME: ([A-Z]+) ?,[^]*NAME: \1[^]*?PAGE/i, "$1");
-    htmlOut += "<h3>" + currName + "</h3>";
-    htmlOut +=
-      "<table><th>TASK NAME</th><th>DATE LAST ACCOMP</th><th>DATE DUE</th>";
-    /*
-    htmlOut += "<tr>" + out[i].replace(
-        /NAME[^]*(PHYSICAL) DUE DATE: (\d\d [A-Z]{3} \d\d)?[^]*?PAGE/i, 
+    /* strip HTML tags and whitespace.  Each array member will now 
+    contain a block of text with tokens separated by a single space */
+    /* out[i] = out[i].replace(
+        /(<\/?(TD|TR|TH|TABLE|P|DIV)\/?>)|\n+/ig, " ")
+      .replace(/\s+/g, " "); */
+    currName = out[i].replace(/NAME: ([A-Z]+) ?,[^]*NAME: \1[^]*?PAGE/i, "$1");
+    //htmlOut += "<h3>" + currName + "</h3>";
+    htmlOut += "<table class=\"table table-bordered table-sm\">" + "<thead class=\"thead-inverse\">" + "<tr>" +
+      "<td colspan=\"3\">" + "<h3 class=\"text-center\">" + currName + "</h3>" + "</td></tr>" + "<tr>" +
+      "<th>TASK NAME</th>" + "<th>DATE LAST ACCOMP</th>" + "<th>DATE DUE</th>" + "</tr></thead><tbody>";
+    /* "PHYSICAL DUE DATE" & "PHYSIOLOGICAL..." are special cases due to how
+    they are placed on the page.  Can turn on/off their inclusion in Each
+    pilot's list of currencies using the SHOW_PHA and SHOW_ROBD constants. */
+    if (SHOW_PHA) {
+      htmlOut += "<tr>" + out[i].replace(/NAME[^]*(PHYSICAL) DUE DATE: (\d\d [A-Z]{3} \d\d)?[^]*?PAGE/i,
         "<td>PHA</td><td></td><td>$2</td>") + "</tr>";
-    htmlOut += "<tr>" + out[i].replace(
-        /NAME[^]*(PHYSIOLOGICAL) DUE DATE: (\d\d [A-Z]{3} \d\d)?[^]*?PAGE/i, 
+    }
+    if (SHOW_ROBD) {
+      htmlOut += "<tr>" + out[i].replace(/NAME[^]*(PHYSIOLOGICAL) DUE DATE: (\d\d [A-Z]{3} \d\d)?[^]*?PAGE/i,
         "<td>ALT CHAMBER/ROBD</td><td></td><td>$2</td>") + "</tr>";
-    */
+    }
+    /* Once the special cases are out of the way, search iteratively for
+    every task name. */
     for (var j = 0; j < taskNames.length; j++) {
       taskName = taskNames[j];
-      re = new RegExp(taskName.replace(
-        /[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&"), "i");
+      /* Format the task name so it can be used to generate a regex. 
+      This primarily consists of ensuring that any special characters
+      will be interpreted correctly by the regex (e.g. "A/R DAY" goes
+      into the regex looking like "A\/R DAY"). */
+      re = new RegExp(taskName.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&"), "i");
+      /* IF ... the current task name is even found in the current
+      pilot's ITS */
       if (re.test(out[i])) {
-        temp = out[i].replace(/(<\/?(TD|TR|TH)\/?>)|\n+/g, " ");
-        temp = temp.replace(/\s+/g, " ");
-        re = new RegExp(taskName + " \\w{4}[^]*?[A-Z]{2}[0-9]{2}", "i");
-        temp = temp.match(re)[0];
-        if (/\d\d [A-Z]{3} \d\d/g.test(temp)) {
-          temp = temp.match(/\d\d [A-Z]{3} \d\d/g)
-            .length === 2 ?
-            "<td>" + temp.match(/\d\d [A-Z]{3} \d\d/g)[0] +
-            "</td><td class=\"due\">" + temp.match(
-              /\d\d [A-Z]{3} \d\d/g)[1] + "</td>" :
-            (
-              window.alert("Error while trying to print dates. " +
-                "Search the code for \"Number of dates found = \""
-              ),
-              "Number of dates found = " + temp.match(
-                /\d\d [A-Z]{3} \d\d/g)
-              .length
-            );
-        } else {
-          temp = "<td>no date found</td><td>no date found</td>";
+        /* Here's the tricky part - finding the TASK NAME and extracting the
+        DATE LAST ACCOMP and DATE DUE.  The challenge is that there can be 
+        0, 1, or 2 dates present.  We're going to assume that if there's
+        only one date it's the DATE LAST ACCOMP and doesn't have a DUE
+        DATE. 
+        The regex we use looks for the task name, and captures everything
+        up to the next task id it finds (two letters + two numbers, + optional 
+        third letter) */
+        re = new RegExp(taskName + "\\s*[A-Z]{2}\\d{2}[A-Z]?[^]*?[A-Z]{2}[0-9]{2}", "i");
+        /* dateTds = a chunk of text starting with the task name and ending with the next
+        task id it finds (actual example: "ACBT AE03 0 5 30 NOV 16 29 JAN 17 I A-10 
+        CMR INEXP-1 TOT APPS AP00").  This will be a much longer string if the task
+        name you're looking for is the last one on the page. */
+        dateTds = out[i].match(re)[0];
+        /* IF ... the block of the text contains a date of format "DD MMM YY" */
+        if (/\d\d (JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC) \d\d/g.test(dateTds)) {
+          var dateArr = dateTds.match(/\d\d (JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC) \d\d/g);
+          if (dateArr.length === 1) {
+            htmlOut += "<tr><td>" + taskName + "</td><td>" + dateArr[0] + "</td><td class=\"due\"></td></tr>";
+          } else {
+            htmlOut += "<tr><td>" + taskName + "</td><td>" + dateArr[0] + "</td><td class=\"due\">" + dateArr[1] +
+              "</td></tr>";
+          }
         }
-        htmlOut += "<tr><td>" + taskName + "</td>" + temp + "</tr>";
       }
     }
-    htmlOut += "</table>";
+    htmlOut += "</tbody><tfoot class=\"small\"></tfoot></table>";
   }
   $("#fileDisplayArea")[0].innerHTML = colorize(htmlOut);
+}
+
+function makeBtns() {
+  $("#topRowBtns")[0].innerHTML += 
+    "<button type=\"button\" class=\"btn btn-outline-secondary\" id=\"allBtn\">All</button>" +
+    "<button type=\"button\" class=\"btn btn-outline-primary\" id=\"gngBtn\">GO/NO-GO</button>" + 
+    "<button type=\"button\" class=\"btn btn-outline-primary\" id=\"flyBtn\">Flying</button>" + 
+    "<button type=\"button\" class=\"btn btn-outline-primary\" id=\"cmrBtn\">CMR</button>";
 }
 
 $("#fileInput")[0].addEventListener("change", function () {
@@ -228,17 +259,546 @@ $("#fileInput")[0].addEventListener("change", function () {
     var file = this.files[0];
     var reader = new FileReader();
     reader.onload = function () {
-      $("#fileData")[0].innerHTML = "File Name: " + file.name +
-        "<br>File " +
-        "Type: " + file.type + "<br>Last Modified: " + dateToDd_Mmm_YyString(file.lastModifiedDate) +
-        "<br>File Size: " + (file.size / 1048576).toFixed(3) + "MB";
-        /* Is a kilobyte 1000 or 1024 bytes?  Yes.
-        https://en.wikipedia.org/wiki/Kilobyte*/
-      printAll(reader.result);
-      $("#fileInput").attr("hidden", true);
+      $("#fileData")[0].innerHTML = "File Name: " + file.name + "<br>File " + "Type: " + file.type +
+        "<br>Last Modified: " + dateToDd_Mmm_YyString(file.lastModifiedDate) + "<br>File Size: " + (file.size /
+          1048576)
+        .toFixed(3) + "MB";
+      $("#mainHeader")[0].innerHTML += "<p class=\"small\">CAO: " + dateToDd_Mmm_YyString(file.lastModifiedDate) +
+        "</p>";
+      makeBtns();
+      printCurrencies(reader.result, ["ACBT", "PREC APP", "A/R DAY", "SEPT", "DAY LANDING",
+        "FORM LNDG", "DEGRAD/DEN GPS", "LOWAT"]);
+      $("#fileInputJumbotron")
+        .attr("hidden", true);
+        getAllTaskIds(reader.result);
     };
     reader.readAsText(file);
   } else {
     $("#fileDisplayArea")[0].innerText = "File not supported!";
   }
 }, false);
+
+function getTaskNameFromId(input) {
+  switch (input) {
+  case "AA01":
+    return "QUAL EVALUATION";
+  case "AA03":
+    return "MSN EVAL";
+  case "AA11":
+    return "INSTRUMENT EVAL";
+  case "AA21":
+    return "COMB Q/I EVAL";
+  case "AE03":
+    return "ACBT";
+  case "AP00":
+    return "TOT APPS";
+  case "AP01":
+    return "PREC APP";
+  case "AP02":
+    return "NON-PREC APP";
+  case "AP03":
+    return "PENETRATION";
+  case "AP11":
+    return "SIM S/E APP";
+  case "AP13":
+    return "NO-FLAP APP";
+  case "AP21":
+    return "CIRCLING APP";
+  case "AP30":
+    return "S/E OUT GO-ARD";
+  case "AR00":
+    return "A/R TOTAL";
+  case "AR01":
+    return "A/R DAY";
+  case "AR02":
+    return "A/R NIGHT";
+  case "DP02":
+    return "TRAIL DEPART";
+  case "EC01":
+    return "EC A/A";
+  case "EC02":
+    return "EC A/G";
+  case "EC04":
+    return "DEGRAD/DEN DL";
+  case "EC05":
+    return "DEGRAD/DEN COMM";
+  case "EC08":
+    return "DEGRAD/DEN GPS";
+  case "EI02":
+    return "HUMAN RELATIONS";
+  case "EI03":
+    return "FORCE PROTECT";
+  case "FF00":
+    return "TOT FS SORTIES";
+  case "FF01":
+    return "TOT DAY FS SRTY";
+  case "FF02":
+    return "TOT NT FS SRTY";
+  case "FF11":
+    return "FS PRI ACFT DAY";
+  case "FF12":
+    return "FS PRI ACFT NT";
+  case "FF21":
+    return "FS NON PRI DAY";
+  case "FF22":
+    return "FS NON PRI NT";
+  case "FH03":
+    return "LAD ATT";
+  case "FH04":
+    return "LAD HIT";
+  case "FH05":
+    return "MAD ATT";
+  case "FH06":
+    return "MAD HIT";
+  case "FH09":
+    return "NIGHT MAD ATT";
+  case "GA02":
+    return "BOLDFACE/CAPS";
+  case "GA03":
+    return "ANTI-HIJACK";
+  case "GA06":
+    return "CRM";
+  case "GA07":
+    return "MARSHALLING EXAM";
+  case "GA09":
+    return "COMSEC";
+  case "GA12":
+    return "CBRNE TRNG";
+  case "GA14":
+    return "SABC";
+  case "GA17":
+    return "NVG/DAS/NVC ACD";
+  case "GA22":
+    return "FCIF CHECK";
+  case "GA23":
+    return "LASER SAFETY";
+  case "GA39":
+    return "WEP/TAC ACAD";
+  case "GA40":
+    return "SAFETY PRIV";
+  case "GA43":
+    return "M9 QUAL";
+  case "GS03":
+    return "SEPT";
+  case "GS05":
+    return "STAN EVAL TEST";
+  case "GS06":
+    return "IRC";
+  case "GS25":
+    return "A/C SERVICE";
+  case "GS26":
+    return "FLY SAFETY TRNG";
+  case "GS28":
+    return "SOF TRNG";
+  case "GS29":
+    return "SOF TOUR";
+  case "GS47":
+    return "VERIFICATION";
+  case "IE05":
+    return "INTEL TRNG";
+  case "LD00":
+    return "TOTAL LNDG";
+  case "LD01":
+    return "DAY LANDING";
+  case "LD02":
+    return "NIGHT LANDING";
+  case "LD04":
+    return "FORM LNDG";
+  case "LD19":
+    return "NVG LNDG";
+  case "LE00":
+    return "LOWAT";
+  case "LE03":
+    return "LOW ALT OPS";
+  case "LE06":
+    return "LOW A/A";
+  case "LE08":
+    return "LOWAT 100";
+  case "LE09":
+    return "LOWAT 300";
+  case "LL01":
+    return "AFE FAM TRNG";
+  case "LL02":
+    return "EGRESS (EJECT)";
+  case "LL03A":
+    return "EGRESS HH60G";
+  case "LL03D":
+    return "EGRESS HC130";
+  case "LL04":
+    return "ACDT";
+  case "LL05":
+    return "EGRSS W/ ACDE";
+  case "LL06":
+    return "AFE TRNG";
+  case "LL06A":
+    return "LS EQ TNG HH60G";
+  case "LL06D":
+    return "LS EQ TG HC310P";
+  case "LL07":
+    return "AFE FIT CHECK";
+  case "ME10":
+    return "INSTR/EVAL DUTY";
+  case "ME14":
+    return "TAC RX ATT";
+  case "ME28":
+    return "NON ADF SEARCH";
+  case "ME43":
+    return "TAC RW";
+  case "ME44":
+    return "TAC FW";
+  case "ME45":
+    return "TAC ISO JTAC";
+  case "ME46":
+    return "TAC NP";
+  case "ME47":
+    return "TAC LTD/IR PTR";
+  case "MF07":
+    return "DMO EVENT MTC";
+  case "MF11":
+    return "MOV TGT ATT MTC";
+  case "MF15":
+    return "EC A/G";
+  case "MF16":
+    return "DT A/G";
+  case "MF18":
+    return "TGT MARK MTC";
+  case "MF19":
+    return "NO FLAP APP MTC";
+  case "MF20":
+    return "SSE GO ARND MTC";
+  case "MF21":
+    return "SSE APP MTC";
+  case "MF29":
+    return "CAS TGT EX JTAC";
+  case "MF30":
+    return "LFE-DMO";
+  case "MF34":
+    return "VIRTUAL FLAG";
+  case "MF38":
+    return "LOW A/A MTC";
+  case "MF39":
+    return "KI MTC";
+  case "MF40":
+    return "SELF MS NT MTC";
+  case "MF41":
+    return "D/D GPS MTC";
+  case "MF42":
+    return "D/D COMM MTC";
+  case "MF43":
+    return "D/D DL MTC";
+  case "MF44":
+    return "TAC TYP II MTC";
+  case "MF45":
+    return "TAC TYP III MTC";
+  case "MF46":
+    return "URBAN CAS";
+  case "MF48":
+    return "CHAFF";
+  case "MF49":
+    return "FLARE";
+  case "MG69":
+    return "SIM WD NIGHT";
+  case "MG70":
+    return "SIM IN/EV DUTY";
+  case "MG71":
+    return "SIM NVG EVENT";
+  case "MG77":
+    return "NGT UAR W/NVD";
+  case "MT01":
+    return "SIM CFF";
+  case "MT12":
+    return "CSAR DMO";
+  case "MT14":
+    return "MTC CAS";
+  case "MT15":
+    return "MTC FAC (A)";
+  case "MT17":
+    return "EMERGENCY PROCEDURES";
+  case "MT20":
+    return "AIR INTER (AI)";
+  case "PP12":
+    return "CENTRIFUGE";
+  case "PP13":
+    return "AGSM ACAD";
+  case "RA03":
+    return "SEAD-C";
+  case "RA05":
+    return "TERMA CN W/SOF";
+  case "RA06":
+    return "TERMA CN W/JTAC";
+  case "RA07":
+    return "CAS URBAN TERRA";
+  case "RA12":
+    return "CFTR";
+  case "RA13":
+    return "CHAFF";
+  case "RA19":
+    return "ESCORT EVENT";
+  case "RA20":
+    return "FLAG EVENT";
+  case "RA21":
+    return "FLARE";
+  case "RA23":
+    return "FSWD/HVWT";
+  case "RA26":
+    return "HAVE QUICK";
+  case "RA28":
+    return "IAM ATT";
+  case "RA29":
+    return "IAM HIT";
+  case "RA33":
+    return "ILLUM FLARE";
+  case "RA35":
+    return "LAS ATT";
+  case "RA36":
+    return "LAS HIT";
+  case "RA38":
+    return "LGB LIVE ATT";
+  case "RA39":
+    return "LGB LIVE HIT";
+  case "RA40":
+    return "LGB SIM ATT";
+  case "RA41":
+    return "LGB SIM HIT";
+  case "RA46":
+    return "SATCOM";
+  case "RA49":
+    return "SECURE VOICE";
+  case "RA52":
+    return "TAC RX HIT";
+  case "RA72":
+    return "KILL BOX OPS";
+  case "RA73":
+    return "MOV TGT";
+  case "RA77":
+    return "TAC TYPE I";
+  case "RA78":
+    return "TAC TYPE II";
+  case "RA79":
+    return "TAC TYPE III";
+  case "RA80":
+    return "TAC LV/TNG ORD";
+  case "RA81":
+    return "TAC TOTAL";
+  case "RA82":
+    return "TAC NIGHT";
+  case "RA84":
+    return "SELF MK STRF NT";
+  case "RA85":
+    return "LSS/T";
+  case "RA91":
+    return "NIGHT STRAFE";
+  case "RB11":
+    return "TAC DAY";
+  case "SC01":
+    return "FCF SRTY";
+  case "SC02":
+    return "FERRY FLIGHT";
+  case "SC11":
+    return "HHQ SORTIE";
+  case "SC12":
+    return "CONTG OPS SORTI";
+  case "SD03":
+    return "OFFSTATIONSRTY";
+  case "SE55":
+    return "FLT DOC TEST";
+  case "SQ04":
+    return "SEPT W/IP-SUP";
+  case "SQ09":
+    return "ACDE SIM";
+  case "SQ10":
+    return "FCF SIM";
+  case "SQ13":
+    return "SIM SEAD/DEAD";
+  case "SQ14":
+    return "SIM PETRAN";
+  case "SQ15":
+    return "SIM CIR APP";
+  case "SQ18":
+    return "SIM PREC APP";
+  case "SQ19":
+    return "SIM NPREC APP";
+  case "SQ23":
+    return "SIM TGP";
+  case "SR00":
+    return "TOT RAP";
+  case "SR07":
+    return "CSAR";
+  case "SR07C":
+    return "CSAR CO";
+  case "SR07T":
+    return "CSAR TSP";
+  case "SR09":
+    return "FAC A";
+  case "SR10":
+    return "FL";
+  case "SR12":
+    return "IP";
+  case "SR14":
+    return "MISSION CC";
+  case "SR15":
+    return "ACM";
+  case "SR16":
+    return "BFM";
+  case "SR17":
+    return "BSA DAY";
+  case "SR18":
+    return "CAS DAY";
+  case "SR18C":
+    return "CAS CO";
+  case "SR18T":
+    return "CAS DAY TSP";
+  case "SR19":
+    return "CAS NIGHT";
+  case "SR19C":
+    return "CAS NIGHT CO";
+  case "SR19T":
+    return "CAS NIGHT TSP";
+  case "SR23":
+    return "FAC (A) DAY";
+  case "SR23C":
+    return "FAC (A) DAY CO";
+  case "SR23T":
+    return "FAC (A) DAY TSP";
+  case "SR24":
+    return "FAC (A) NGT";
+  case "SR24C":
+    return "FAC (A)NGT CO";
+  case "SR24T":
+    return "FAC (A) NGT TSP";
+  case "SR27":
+    return "SA DAY";
+  case "SR28":
+    return "SA NIGHT";
+  case "SR28C":
+    return "SA NIGHT CO";
+  case "SR33":
+    return "BSA NIGHT";
+  case "SR45":
+    return "MAS/CFF";
+  case "SR45C":
+    return "MAS/CFF CO";
+  case "SR45T":
+    return "MASS/CFF TSP";
+  case "SR72":
+    return "AI";
+  case "SR72C":
+    return "AI CO";
+  case "SR72T":
+    return "AI TSP";
+  case "SS01":
+    return "LOCAL AREA SURV";
+  case "SS02":
+    return "CMBT SURV TRNG";
+  case "SS03":
+    return "CAC TRNG";
+  case "SS05":
+    return "WST";
+  case "SS06":
+    return "EPT";
+  case "SS07A":
+    return "CSI AFRICOM";
+  case "SS07C":
+    return "CSI CENTCOM";
+  case "SS07E":
+    return "CSI EUCOM";
+  case "SS07P":
+    return "CSI PACOM";
+  case "SS07S":
+    return "CSI SOUTHCOM";
+  case "SS08":
+    return "HEEDS TRNG";
+  case "SS09":
+    return "HHT WITH ACDE";
+  case "SS20":
+    return "S-V80-A";
+  case "SS27":
+    return "HSTG SRV SV93A";
+  case "SS30":
+    return "S-V84-A";
+  case "SS31":
+    return "WTRSRVPAR SV86A";
+  case "SS32":
+    return "S-V90-A";
+  case "ST00":
+    return "TOTAL SORTIES";
+  case "SX06":
+    return "DEMANDING SRTY";
+  case "SX07":
+    return "NON-DEMAND SRT";
+  case "SX08":
+    return "INSTRUMENT SRTY";
+  case "SX08C":
+    return "INST SORTIE CO";
+  case "SX08T":
+    return "INST ST THEATE";
+  case "SX10":
+    return "AHC";
+  case "TE01":
+    return "NVG EVENT";
+  case "TF02":
+    return "IMQT COMP";
+  case "TF03":
+    return "FL QUAL DATE";
+  case "TF04":
+    return "INSTR QUAL DATE";
+  case "TO03":
+    return "FORM T/O";
+  case "VV02":
+    return "NVG/DAS/NVC DMD";
+  case "VV03":
+    return "NVG CURRENCY";
+  case "WD00":
+    return "TOT WPNS DEL";
+  case "WD11":
+    return "AIM-9 ATT";
+  case "WD12":
+    return "AIM-9 HIT";
+  case "WD14":
+    return "HAS ATT";
+  case "WD15":
+    return "HAS HIT";
+  case "WD20":
+    return "TGP ACTIVITY";
+  case "WD22":
+    return "LRS ATT";
+  case "WD23":
+    return "LRS HIT";
+  case "WD24":
+    return "MAV ATT";
+  case "WD25":
+    return "MAV HIT";
+  case "WD26":
+    return "LGB ACTUAL";
+  case "WD27":
+    return "TARGET MARK";
+  case "WD28":
+    return "TTS ATT";
+  case "WD29":
+    return "TTS HIT";
+  case "WD31":
+    return "DT";
+  case "WD45":
+    return "IAM SIM ATT";
+  case "WD46":
+    return "IAM SIM HIT";
+  case "WD47":
+    return "WD NIGHT";
+  case "WD51":
+    return "NIGHT HAS ATT";
+  case "WD52":
+    return "NIGHT HAS HITS";
+  case "WD53":
+    return "NIGHT MAV ATT";
+  case "WD54":
+    return "NIGHT MAV HITS";
+  case "WD55":
+    return "IAM WPNS DEL";
+  case "WD56":
+    return "LIVE MAVERICK";
+  case "WD57":
+    return "MAV LIVE HIT";
+  default:
+    return "";
+  }
+}
