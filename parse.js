@@ -1,8 +1,28 @@
 "use strict";
-
-const SHOW_PHA = true;
-const SHOW_ROBD = true;
-const ALL_TASK_IDS = ["AE03","AP00","AP01","AP02","AP03","AP11","AP13","AP21","AP30","AR01","AR02","DP02","EC01","EC02","EC04","EC05","EC08","GS03","LD00","LD01","LD02","LD04","LD19","LE00","LE03","LE06","MF07","MF11","MF15","MF16","MF19","MF20","MF21","MF29","MF30","MF34","MF38","MF39","MF40","MF41","MF42","MF43","MF46","MF48","MF49","MG69","MG71","MT01","MT14","MT17","MT20","RA03","RA05","RA06","RA07","RA12","RA13","RA19","RA20","RA21","RA23","RA26","RA33","RA46","RA49","RA72","RA73","RA84","RA85","SC02","SC11","SD03","SQ04","SQ09","SQ13","SQ14","SQ15","SQ18","SQ19","SQ23","SR00","SR15","SR16","SR17","SR18","SR18C","SR18T","SR19","SR19C","SR19T","SR27","SR28","SR28C","SR33","SR45","SR45C","SR45T","SR72","SR72C","SR72T","ST00","SX06","SX07","SX08","SX08C","SX08T","SX10","TE01","TO03","VV02","VV03","WD00","WD31","WD47","FH03","FH04","FH05","FH06","FH09","ME14","RA28","RA29","RA35","RA36","RA38","RA39","RA40","RA41","RA91","WD11","WD12","WD14","WD15","WD22","WD23","WD24","WD25","WD26","WD28","WD45","WD46","WD53","WD56","AA01","AA03","AA11","AA21","GA02","GA06","GA07","GA09","GA12","GA14","GA17","GA23","GA39","GA40","GA43","GS06","GS25","GS26","GS47","IE05","LL01","LL02","LL04","LL05","LL06","LL07","PP12","PP13","SS01","SS02","SS03","SS05","SS06","SS07A","SS07C","SS07E","SS07P","SS07S","SS09","SV86A","FF00","FF01","FF02","FF11","FF12","FF21","FF22","EI02","EI03","GA03","SS20","SV93A","GA22","HH60G","LL03D","LL06D","SE55","SS08","SS30","SS32","SC12","RA52","SR10","ME10","MG70","SR12","LE09","ME28","MT12","SR07","SR07C","SR07T","ME43","ME44","ME45","ME46","ME47","MF18","MF44","MF45","MG77","MT15","RA77","RA78","RA79","RA80","RA81","RA82","RB11","SR09","SR23","SR23C","SR23T","SR24","SR24C","SR24T","WD27","LE08","GS28","GS29","SC01","SQ10","TF02","TF03","TF04","GS05","AR00","WD20","SR14","WD29","WD51","WD52","WD54","WD55","WD57"];
+const SHOW_PHA = false;
+const SHOW_ROBD = false;
+const WARNING_DATE = NOW_PLUS_ONE_WEEK();
+const ALL_TASK_IDS = ["AA01", "AA03", "AA11", "AA21", "AE03", "AP00", "AP01", "AP02", "AP03", "AP11", "AP13", "AP21",
+  "AP30", "AR00", "AR01", "AR02", "DP02", "EC01", "EC02", "EC04", "EC05", "EC08", "EI02", "EI03", "FF00", "FF01",
+  "FF02", "FF11", "FF12", "FF21", "FF22", "FH03", "FH04", "FH05", "FH06", "FH09", "GA02", "GA03", "GA06", "GA07",
+  "GA09", "GA12", "GA14", "GA17", "GA22", "GA23", "GA39", "GA40", "GA43", "GS03", "GS05", "GS06", "GS25", "GS26",
+  "GS28", "GS29", "GS47", "HH60G", "IE05", "LD00", "LD01", "LD02", "LD04", "LD19", "LE00", "LE03", "LE06", "LE08",
+  "LE09", "LL01", "LL02", "LL03D", "LL04", "LL05", "LL06", "LL06D", "LL07", "ME10", "ME14", "ME28", "ME43", "ME44",
+  "ME45", "ME46", "ME47", "MF07", "MF11", "MF15", "MF16", "MF18", "MF19", "MF20", "MF21", "MF29", "MF30", "MF34",
+  "MF38", "MF39", "MF40", "MF41", "MF42", "MF43", "MF44", "MF45", "MF46", "MF48", "MF49", "MG69", "MG70", "MG71",
+  "MG77", "MT01", "MT12", "MT14", "MT15", "MT17", "MT20", "PP12", "PP13", "RA03", "RA05", "RA06", "RA07", "RA12",
+  "RA13", "RA19", "RA20", "RA21", "RA23", "RA26", "RA28", "RA29", "RA33", "RA35", "RA36", "RA38", "RA39", "RA40",
+  "RA41", "RA46", "RA49", "RA52", "RA72", "RA73", "RA77", "RA78", "RA79", "RA80", "RA81", "RA82", "RA84", "RA85",
+  "RA91", "RB11", "SC01", "SC02", "SC11", "SC12", "SD03", "SE55", "SQ04", "SQ09", "SQ10", "SQ13", "SQ14", "SQ15",
+  "SQ18", "SQ19", "SQ23", "SR00", "SR07", "SR07C", "SR07T", "SR09", "SR10", "SR12", "SR14", "SR15", "SR16", "SR17",
+  "SR18", "SR18C", "SR18T", "SR19", "SR19C", "SR19T", "SR23", "SR23C", "SR23T", "SR24", "SR24C", "SR24T", "SR27",
+  "SR28", "SR28C", "SR33", "SR45", "SR45C", "SR45T", "SR72", "SR72C", "SR72T", "SS01", "SS02", "SS03", "SS05", "SS06",
+  "SS07A", "SS07C", "SS07E", "SS07P", "SS07S", "SS08", "SS09", "SS20", "SS30", "SS32", "ST00", "SV86A", "SV93A",
+  "SX06", "SX07", "SX08", "SX08C", "SX08T", "SX10", "TE01", "TF02", "TF03", "TF04", "TO03", "VV02", "VV03", "WD00",
+  "WD11", "WD12", "WD14", "WD15", "WD20", "WD22", "WD23", "WD24", "WD25", "WD26", "WD27", "WD28", "WD29", "WD31",
+  "WD45", "WD46", "WD47", "WD51", "WD52", "WD53", "WD54", "WD55", "WD56", "WD57"];
+const DO_TASK_IDS = ["SX06", "LD01", "AP01", "TO03", "LD04", "TE01", "VV02", "LL07", "GS03", "MT17", "AR01", "AE03",
+  "AR01"];
 
 function monthAbbrToNum(input, isZeroSubscript) {
   isZeroSubscript = arguments.length === 1 ? false : isZeroSubscript;
@@ -147,7 +167,7 @@ function colorize(html) {
     dateString = dateString.replace(/^\d [A-Z]{3} \d\d/i, "0$&");
     if (xDate <= Date.now()) {
       return "<td class=\"text-danger\">" + dateString + "</td>";
-    } else if (xDate <= NOW_PLUS_ONE_WEEK()) {
+    } else if (xDate <= WARNING_DATE) {
       return "<td class=\"text-warning\">" + dateString + "</td>";
     } else {
       return "<td>" + dateString + "</td>";
@@ -158,125 +178,20 @@ function colorize(html) {
 /* Generate a list of all the unique task ids found 
 in the file. */
 function getAllTaskIds(xml) {
-  var outputStr = "\"";
+  var outputStr = "";
   var modXml = xml.replace(/(<\/?(TD|TR|TH|TABLE|P|DIV)\/?>)|\n+/ig, " ")
     .replace(/\s{2,}/g, " ");
   modXml = modXml.match(/ [A-Z]{2}\d{2}[A-Z]? /gi);
   for (var i = 0; i < modXml.length; i++) {
-    modXml[i] = modXml[i].replace(/\s*/g,"");
+    modXml[i] = modXml[i].replace(/\s*/g, "");
     if (!outputStr.includes(modXml[i].valueOf())) {
-      outputStr += modXml[i] + "\",\"";
+      outputStr += modXml[i] + " ";
     }
   }
-  console.log(outputStr);
+  outputStr = outputStr.split(" ")
+    .sort()
+    .join("\",\"");
 }
-
-function printCurrencies(xml, taskNames) {
-  var dateTds, taskName, re, currName;
-  var htmlOut = "";
-  xml = xml.replace(/(<\/?(TD|TR|TH|TABLE|P|DIV)\/?>)|\n+/ig, " ")
-    .replace(/\s+/g, " ");
-  /* Slice the xml into an array of pilots.  Each array member contains from 
-  the first time that pilot's name is mentioned to the page number declaration 
-  on the last page that has their name.  Read up on greedy vs. reluctant to 
-  see how it works and use https://regexper.com to visualize it. */
-  var out = xml.match(/NAME: ([A-Z]+) ?,[^]*NAME: \1[^]*?PAGE/gi);
-  for (var i = 0; i < out.length; i++) {
-    /* strip HTML tags and whitespace.  Each array member will now 
-    contain a block of text with tokens separated by a single space */
-    /* out[i] = out[i].replace(
-        /(<\/?(TD|TR|TH|TABLE|P|DIV)\/?>)|\n+/ig, " ")
-      .replace(/\s+/g, " "); */
-    currName = out[i].replace(/NAME: ([A-Z]+) ?,[^]*NAME: \1[^]*?PAGE/i, "$1");
-    //htmlOut += "<h3>" + currName + "</h3>";
-    htmlOut += "<table class=\"table table-bordered table-sm\">" + "<thead class=\"thead-inverse\">" + "<tr>" +
-      "<td colspan=\"3\">" + "<h3 class=\"text-center\">" + currName + "</h3>" + "</td></tr>" + "<tr>" +
-      "<th>TASK NAME</th>" + "<th>DATE LAST ACCOMP</th>" + "<th>DATE DUE</th>" + "</tr></thead><tbody>";
-    /* "PHYSICAL DUE DATE" & "PHYSIOLOGICAL..." are special cases due to how
-    they are placed on the page.  Can turn on/off their inclusion in Each
-    pilot's list of currencies using the SHOW_PHA and SHOW_ROBD constants. */
-    if (SHOW_PHA) {
-      htmlOut += "<tr>" + out[i].replace(/NAME[^]*(PHYSICAL) DUE DATE: (\d\d [A-Z]{3} \d\d)?[^]*?PAGE/i,
-        "<td>PHA</td><td></td><td>$2</td>") + "</tr>";
-    }
-    if (SHOW_ROBD) {
-      htmlOut += "<tr>" + out[i].replace(/NAME[^]*(PHYSIOLOGICAL) DUE DATE: (\d\d [A-Z]{3} \d\d)?[^]*?PAGE/i,
-        "<td>ALT CHAMBER/ROBD</td><td></td><td>$2</td>") + "</tr>";
-    }
-    /* Once the special cases are out of the way, search iteratively for
-    every task name. */
-    for (var j = 0; j < taskNames.length; j++) {
-      taskName = taskNames[j];
-      /* Format the task name so it can be used to generate a regex. 
-      This primarily consists of ensuring that any special characters
-      will be interpreted correctly by the regex (e.g. "A/R DAY" goes
-      into the regex looking like "A\/R DAY"). */
-      re = new RegExp(taskName.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&"), "i");
-      /* IF ... the current task name is even found in the current
-      pilot's ITS */
-      if (re.test(out[i])) {
-        /* Here's the tricky part - finding the TASK NAME and extracting the
-        DATE LAST ACCOMP and DATE DUE.  The challenge is that there can be 
-        0, 1, or 2 dates present.  We're going to assume that if there's
-        only one date it's the DATE LAST ACCOMP and doesn't have a DUE
-        DATE. 
-        The regex we use looks for the task name, and captures everything
-        up to the next task id it finds (two letters + two numbers, + optional 
-        third letter) */
-        re = new RegExp(taskName + "\\s*[A-Z]{2}\\d{2}[A-Z]?[^]*?[A-Z]{2}[0-9]{2}", "i");
-        /* dateTds = a chunk of text starting with the task name and ending with the next
-        task id it finds (actual example: "ACBT AE03 0 5 30 NOV 16 29 JAN 17 I A-10 
-        CMR INEXP-1 TOT APPS AP00").  This will be a much longer string if the task
-        name you're looking for is the last one on the page. */
-        dateTds = out[i].match(re)[0];
-        /* IF ... the block of the text contains a date of format "DD MMM YY" */
-        if (/\d\d (JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC) \d\d/g.test(dateTds)) {
-          var dateArr = dateTds.match(/\d\d (JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC) \d\d/g);
-          if (dateArr.length === 1) {
-            htmlOut += "<tr><td>" + taskName + "</td><td>" + dateArr[0] + "</td><td class=\"due\"></td></tr>";
-          } else {
-            htmlOut += "<tr><td>" + taskName + "</td><td>" + dateArr[0] + "</td><td class=\"due\">" + dateArr[1] +
-              "</td></tr>";
-          }
-        }
-      }
-    }
-    htmlOut += "</tbody><tfoot class=\"small\"></tfoot></table>";
-  }
-  $("#fileDisplayArea")[0].innerHTML = colorize(htmlOut);
-}
-
-function makeBtns() {
-  $("#topRowBtns")[0].innerHTML += 
-    "<button type=\"button\" class=\"btn btn-outline-secondary\" id=\"allBtn\">All</button>" +
-    "<button type=\"button\" class=\"btn btn-outline-primary\" id=\"gngBtn\">GO/NO-GO</button>" + 
-    "<button type=\"button\" class=\"btn btn-outline-primary\" id=\"flyBtn\">Flying</button>" + 
-    "<button type=\"button\" class=\"btn btn-outline-primary\" id=\"cmrBtn\">CMR</button>";
-}
-
-$("#fileInput")[0].addEventListener("change", function () {
-  if (this.files[0].type.match(/text.*/)) {
-    var file = this.files[0];
-    var reader = new FileReader();
-    reader.onload = function () {
-      $("#fileData")[0].innerHTML = "File Name: " + file.name + "<br>File " + "Type: " + file.type +
-        "<br>Last Modified: " + dateToDd_Mmm_YyString(file.lastModifiedDate) + "<br>File Size: " + (file.size /
-          1048576)
-        .toFixed(3) + "MB";
-      $("#mainHeader")[0].innerHTML += "<p class=\"small\">CAO: " + dateToDd_Mmm_YyString(file.lastModifiedDate) +
-        "</p>";
-      makeBtns();
-      printCurrencies(reader.result, ["ACBT", "PREC APP", "A/R DAY", "SEPT", "DAY LANDING",
-        "FORM LNDG", "DEGRAD/DEN GPS", "LOWAT"]);
-      $("#fileInputJumbotron")
-        .attr("hidden", true);
-        getAllTaskIds(reader.result);
-    };
-    reader.readAsText(file);
-  } else {
-    $("#fileDisplayArea")[0].innerText = "File not supported!";
-  }
-}, false);
 
 function getTaskNameFromId(input) {
   switch (input) {
@@ -802,3 +717,108 @@ function getTaskNameFromId(input) {
     return "";
   }
 }
+
+function printCurrencies(xml, taskIds) {
+  var dateTds, taskId, re, currName, pilotArr;
+  var htmlOut = "";
+  /* strip HTML tags and whitespace.  The xml is now a block of 
+  text with tokens separated by a single space. */
+  xml = xml.replace(/(<\/?(TD|TR|TH|TABLE|P|DIV)\/?>)|\n+/ig, " ")
+    .replace(/\s+/g, " ");
+  /* Slice the xml into an array of pilots.  Each array member contains from 
+  the first time that pilot's name is mentioned to the page number declaration 
+  on the last page that has their name.  Read up on greedy vs. reluctant to 
+  see how it works and use https://regexper.com to visualize it. */
+  pilotArr = xml.match(/NAME: ([A-Z]+) ?,[^]*NAME: \1[^]*?PAGE/gi);
+  for (var i = 0; i < pilotArr.length; i++) {
+    currName = pilotArr[i].replace(/NAME: ([A-Z]+) ?,[^]*NAME: \1[^]*?PAGE/i, "$1");
+    /* Print the current pilot's name to the top of his/her currency table. */
+    htmlOut += "<table class=\"table table-bordered table-sm\">" + "<thead class=\"thead-inverse\">" + "<tr>" +
+      "<td colspan=\"3\">" + "<h3 class=\"text-center\">" + currName + "</h3>" + "</td></tr>" + "<tr>" +
+      "<th>TASK NAME</th>" + "<th>DATE LAST ACCOMP</th>" + "<th>DATE DUE</th>" + "</tr></thead><tbody>";
+    /* "PHYSICAL DUE DATE" & "PHYSIOLOGICAL..." are special cases due to how
+    they are placed on the page.  Can turn on/off their inclusion in each
+    pilot's list of currencies using the SHOW_PHA and SHOW_ROBD constants. */
+    if (SHOW_PHA) {
+      htmlOut += "<tr>" + pilotArr[i].replace(/NAME[^]*(PHYSICAL) DUE DATE: (\d\d [A-Z]{3} \d\d)?[^]*?PAGE/i,
+        "<td>PHA</td><td></td><td class=\"due\">$2</td>") + "</tr>";
+    }
+    if (SHOW_ROBD) {
+      htmlOut += "<tr>" + pilotArr[i].replace(/NAME[^]*(PHYSIOLOGICAL) DUE DATE: (\d\d [A-Z]{3} \d\d)?[^]*?PAGE/i,
+        "<td>ALT CHAMBER/ROBD</td><td></td><td class=\"due\">$2</td>") + "</tr>";
+    }
+    /* Once the special cases are out of the way, search iteratively for
+    every task id in taskIds. */
+    for (var j = 0; j < taskIds.length; j++) {
+      taskId = taskIds[j];
+      re = new RegExp(taskId, "i");
+      /* IF ... the current task name is even found in the current
+      pilot's ITS */
+      if (re.test(pilotArr[i])) {
+        /* Here's the tricky part - finding the TASK ID and extracting the
+        DATE LAST ACCOMP and DATE DUE.  The challenge is that there can be 
+        0, 1, or 2 dates present.  We're going to assume that if there's
+        only one date it's the DATE LAST ACCOMP and doesn't have a DUE
+        DATE. 
+        The regex we use looks for the task name, and captures everything
+        up to the next task id it finds (two letters + two numbers, + optional 
+        third letter) */
+        re = new RegExp(taskId + "[^]*?([A-Z]{2}[0-9]{2}[A-Z]?|$)", "i");
+        /* dateTds = a chunk of text starting with the task name and ending with the next
+        task id it finds (actual example: "AE03 0 5 30 NOV 16 29 JAN 17 I A-10 
+        CMR INEXP-1 TOT APPS AP00").  This will be a much longer string if the task
+        name you're looking for is the last one on the page. */
+        /* console.log("i = " + i);
+        console.log("j = " + j);
+        console.log("currPilot = " + currName);
+        console.log("attempting to match re = " + re + " in pilotArr[" + i + "] = " + pilotArr[i]); */
+        dateTds = pilotArr[i].match(re)[0];
+        /* IF ... the block of the text contains a date of format "DD MMM YY" followed one space
+        later by a single letter*/
+        if (/ \d\d (JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC) \d\d [A-Z] /i.test(dateTds)) {
+          dateTds = dateTds.replace(/(^[^]*?\d\d (JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC) \d\d [A-Z]) [^]*$/i,
+            "$1");
+          var dateArr = dateTds.match(/\d\d (JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC) \d\d/g);
+          if (dateArr.length === 1) {
+            htmlOut += "<tr><td>" + getTaskNameFromId(taskId) + " (" + taskId + ")</td><td>" + dateArr[0] +
+              "</td><td class=\"due\"></td></tr>";
+          } else if (dateArr.length === 2) {
+            htmlOut += "<tr><td>" + getTaskNameFromId(taskId) + " (" + taskId + ")</td><td>" + dateArr[0] +
+              "</td><td class=\"due\">" + dateArr[1] + "</td></tr>";
+          }
+        }
+      }
+    }
+    htmlOut += "</tbody><tfoot class=\"small\"></tfoot></table>";
+  }
+  $("#fileDisplayArea")[0].innerHTML = colorize(htmlOut);
+}
+
+function makeBtns() {
+  $("#topRowBtns")[0].innerHTML +=
+    "<button type=\"button\" class=\"btn btn-outline-secondary\" id=\"allBtn\">All</button>" +
+    "<button type=\"button\" class=\"btn btn-outline-primary\" id=\"gngBtn\">GO/NO-GO</button>" +
+    "<button type=\"button\" class=\"btn btn-outline-primary\" id=\"flyBtn\">Flying</button>" +
+    "<button type=\"button\" class=\"btn btn-outline-primary\" id=\"cmrBtn\">CMR</button>";
+}
+$("#fileInput")[0].addEventListener("change", function () {
+  if (this.files[0].type.match(/text.*/)) {
+    var file = this.files[0];
+    var reader = new FileReader();
+    reader.onload = function () {
+      $("#fileData")[0].innerHTML = "File Name: " + file.name + "<br>File " + "Type: " + file.type +
+        "<br>Last Modified: " + dateToDd_Mmm_YyString(file.lastModifiedDate) + "<br>File Size: " + (file.size /
+          1048576)
+        .toFixed(3) + "MB";
+      $("#mainHeader")[0].innerHTML += "<p class=\"small\">CAO: " + dateToDd_Mmm_YyString(file.lastModifiedDate) +
+        "</p>";
+      $("#fileInputJumbotron")
+        .attr("hidden", true);
+      // makeBtns();
+      printCurrencies(reader.result, DO_TASK_IDS);
+    };
+    reader.readAsText(file);
+  } else {
+    $("#fileDisplayArea")[0].innerText = "File not supported!";
+  }
+}, false);
