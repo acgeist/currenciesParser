@@ -1,4 +1,10 @@
-﻿<!doctype html>
+﻿<!--
+TODO:
+-Figure out how to host static page using AWS
+-Add progress bar for processing? http://devdocs.io/html/element/progress
+
+-->
+<!doctype html>
 <html lang="en-US">
 
 <head>
@@ -16,6 +22,9 @@
         margin-right: 10%;
         margin-top: 2%;
       }
+      ::-ms-tooltip { 
+        display: none; 
+      }
     </style>
 </head>
 
@@ -28,33 +37,17 @@
     <h1 hidden><img alt="75FS Patch" width="287" height="333" style="width: 103px; height: 114px;" src="http://www.moody.af.mil/portals/96/Users/018/30/530/75th_fs%20afpims.png"
       /> 75FS Currencies Checker</h1>
   </div>
-  <div class="jumbotron" id="fileInputJumbotron"> <input type="file" id="fileInput" accept="application/xml"></input>
+  <div class="jumbotron" id="fileInputJumbotron"> <input type="file" id="fileInput" accept="application/xml">
     <p>Look for an "its.xml" file somewhere in \\52qseu-fs-01pv\Moody_FG\FG Old File Structure\435fts\23 FG\74 FS\19. SARM\OEF
       PLANNING\NEW SARM\4. ARMS PRODUCTS</p>
     <p hidden>Look for an "its.xml" file somewhere in \\52qseu-fs-01pv\FG Old File Structure\435fts\23 FG\75 FS\6. DOT\2. Products\0.
       1CO Products</p>
   </div>
-  <div id="fileData" hidden></div>
-  <!-- 
-  http://thenewcode.com/757/Playing-With-The-HTML5-range-Slider-Input
-  http://seiyria.com/bootstrap-slider/ 
-  -->
-  <div id="sliderDiv" hidden>
-    <label for="cautionSlider">Highlight yellow if within <strong id="cautionSetting2">7</strong> days</label>
-    <p>
-      <input type="range" min="1" max="90" value="7" id="cautionSlider" step="1" oninput="outputUpdate(value)" list="cautionOptions"></input>
-      </p>
-    <datalist id="cautionOptions">
-      <option>7</option>
-      <option>30</option>
-      <option>60</option>
-      <option>90</option>
-    </datalist>
-    <output for="cautionSlider" id="cautionSetting" hidden>7</output>
-  </div>
-  <div id="topRowBtns" class="btn-group-justified"></div>
+  <div id="fileData" hidden></div>  
+  <div id="sliderDiv"></div> 
+  <!-- <div id="topRowBtns" class="btn-group" role="group"></div> -->
+  <div id="topRowBtns"></div><br>
   <div id="fileDisplayArea"></div>
-  </div>
   <!--************************SCRIPTS*********************-->
   <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n"
     crossorigin="anonymous"></script>
@@ -62,7 +55,6 @@
       "use strict";
       const SHOW_PHA = false;
       const SHOW_ROBD = false;
-      //const WARNING_DATE = NOW_PLUS_X_DAYS($("#cautionSetting")[0].value);
       const OPS_TASK_IDS = ["AE03", "AP01", "AR01", "AR02", "GS03", "LD01", "LD04", "LD19", "LE00", "LE06", "SX06",
         "TO03", "VV02", "SR12", "LE08", "LE09", "AA03", "GA02", "GA06", "GS06", "LL02", "LL07", "SS06"
       ];
@@ -107,13 +99,6 @@
         "WD31",
         "WD45", "WD46", "WD47", "WD51", "WD52", "WD53", "WD54", "WD55", "WD56", "WD57"
       ];
-
-      function outputUpdate(newSetting) {
-        $("#cautionSetting")[0].value = newSetting;
-        $("#cautionSetting2")[0].innerHTML = newSetting;
-        $("#fileDisplayArea")[0].innerHTML = colorize($("#fileDisplayArea")[0].innerHTML, NOW_PLUS_X_DAYS($(
-          "#cautionSetting")[0].value));
-      }
 
       function monthAbbrToNum(input, isZeroSubscript) {
         isZeroSubscript = arguments.length === 1 ? false : isZeroSubscript;
@@ -253,6 +238,7 @@
       }
 
       function colorize(html, warnDate) {
+        console.log("Colorize called with date " + warnDate + ".");
         var xDates = html.replace(/<td class="(text-(danger|warning) )?due">(\d\d) ([A-Z]{3}) (\d\d)<\/td>/gi, function (
           capture) {
           var xDate = dD_Mmm_YyStringToDate(capture);
@@ -886,15 +872,15 @@
           }
           htmlOut += "</tbody><tfoot class=\"small\"></tfoot></table>";
         }
-        $("#fileDisplayArea")[0].innerHTML = colorize(htmlOut, NOW_PLUS_X_DAYS($("#cautionSetting")[0].value));
+        $("#fileDisplayArea")[0].innerHTML = colorize(htmlOut, NOW_PLUS_X_DAYS(7));
       }
 
       function makeBtns(xml) {
         $("#topRowBtns")[0].innerHTML +=
-          "<button type=\"button\" class=\"btn btn-outline-primary\" id=\"opsBtn\">Ops Desk</button>" +
-          "<button type=\"button\" class=\"btn btn-outline-primary\" id=\"gngBtn\">GO/NO-GO</button>" +
-          "<button type=\"button\" class=\"btn btn-outline-primary\" id=\"cmrBtn\">CMR</button>" +
-          "<button type=\"button\" class=\"btn btn-outline-primary\" id=\"allBtn\">ALL</button>";
+          "<button type=\"button\" class=\"btn btn-secondary\" id=\"opsBtn\">Ops Desk</button>" +
+          "<button type=\"button\" class=\"btn btn-secondary\" id=\"gngBtn\">GO/NO-GO</button>" +
+          "<button type=\"button\" class=\"btn btn-secondary\" id=\"cmrBtn\">CMR</button>" +
+          "<button type=\"button\" class=\"btn btn-secondary\" id=\"allBtn\">ALL</button>";
         $("#opsBtn")[0].addEventListener("click", function () {
           printCurrencies(xml, OPS_TASK_IDS)
         });
@@ -908,6 +894,26 @@
           printCurrencies(xml, ALL_TASK_IDS)
         });
       }
+
+      function makeSlider(){
+        /* 
+        http://thenewcode.com/757/Playing-With-The-HTML5-range-Slider-Input
+        http://seiyria.com/bootstrap-slider/ 
+        */
+        $("#sliderDiv")[0].innerHTML += 
+        "<label for=\"cautionSlider\">Highlight yellow if within " + 
+        "<strong><span id=\"cautionSetting\">7</span></strong>" + 
+        " days.</label>" + 
+        "<p><input type=\"range\" min=\"1\" max=\"90\" value=\"7\" id=\"cautionSlider\" step=\"1\" list=\"cautionOptions\"></p>" + 
+        "<datalist id=\"cautionOptions\">" + "<option>7</option><option>30</option><option>60</option><option>90</option>" + 
+        "</datalist>";
+        $("#cautionSlider")[0].addEventListener("mouseup", function(){
+          $("#cautionSetting")[0].innerHTML = $("#cautionSlider")[0].value;
+          $("#fileDisplayArea")[0].innerHTML = colorize($("#fileDisplayArea")[0].innerHTML, NOW_PLUS_X_DAYS($(
+          "#cautionSlider")[0].value));
+        });
+      }
+      
       $("#fileInput")[0].addEventListener("change", function () {
         if (this.files[0].type.match(/text.*/)) {
           var file = this.files[0];
@@ -916,11 +922,11 @@
             /*
             $("#fileData")[0].innerHTML = "File Name: " + file.name < file.name > +"<br>File " + "Type: " + file.type + "<br>Last Modified: " + dateToDd_Mmm_YyString(file.lastModifiedDate) + "<br>File Size: " + (file.size / 1048576).toFixed(3) + "MB";
             */
-            $("#mainHeader")[0].innerHTML += "<p class=\"small\">CAO: " + dateToDd_Mmm_YyString(file.lastModifiedDate) +
-              "</p>";
+            $("#mainHeader")[0].innerHTML += "<p class=\"small\">CAO: " + dateToDd_Mmm_YyString(file.lastModifiedDate) + "</p>";
             $("#fileInputJumbotron").attr("hidden", true);
-            $("#sliderDiv").attr("hidden", false);
+            // $("#sliderDiv").attr("hidden", false);
             /* TODO: store reader.result somewhere useful (hidden <div id="rawXml"><p>raw xml</p></div>?) */
+            makeSlider();
             makeBtns(reader.result);
             printCurrencies(reader.result, OPS_TASK_IDS);                      
           };
