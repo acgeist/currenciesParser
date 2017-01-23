@@ -1,15 +1,6 @@
 ﻿<!--
 TODO:
 -Add progress bar for processing? http://devdocs.io/html/element/progress
--Allow users to add custom task names/ids/subsets
--Consolidate code, split into html/js/css
--beautify code
--Make welcome page from which users can go to a specific squadron or the generic one.
--Write tests for all functions
--Extract used portions of bootstrap?
--Do something better with PHA/ROBD.
--Log usage?
--dtd/strict schema?
 -->
 <!doctype html>
 <html lang="en-US">
@@ -17,24 +8,20 @@ TODO:
 <head>
   <title>ITS Reader</title>
   <meta charset="utf-8">
-  <meta name="description" content="Pull useful currency data from ITS.pdf">
-  <meta name="keywords" content="ITS, Oracle, DOT, currencies, ARM, ARMS, SARM, 1C0">
+  <meta name="description" content="Parse ITS.pdf into something usable.">
+  <meta name="keywords" content="ITS, Oracle, DOT, currencies, ARMS, SARM, 1C0">
   <meta name="author" content="Andrew Geist">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <!-- favicon from https://commons.wikimedia.org/wiki/File:GAU-8A_Avenger_Gatling_gun_front.jpg 
-  (modified using http://www.favicon-generator.org/) -->
-  <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css"
-    integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ"
+    crossorigin="anonymous">
     <style>
       body {
         margin-left: 10%;
         margin-right: 10%;
         margin-top: 2%;
       }
-      
-       ::-ms-tooltip {
-        display: none;
+      ::-ms-tooltip { 
+        display: none; 
       }
     </style>
 </head>
@@ -42,20 +29,15 @@ TODO:
 <body>
   <div class="container">
     <div class="page-header" id="mainHeader">
-      <h1><img alt="74FS Patch" width="287" height="333" style="width: 103px; height: 114px;" src="http://www.moody.af.mil/portals/96/Users/018/30/530/74th_fs%20afpims.png"
-        /> 74FS Currencies Checker</h1>
+      <h1>ITS Currencies Checker</h1>
     </div>
-    <h1 hidden><img alt="75FS Patch" width="287" height="333" style="width: 103px; height: 114px;" src="http://www.moody.af.mil/portals/96/Users/018/30/530/75th_fs%20afpims.png"
-      /> 75FS Currencies Checker</h1>
   </div>
   <div class="jumbotron" id="fileInputJumbotron"> <input type="file" id="fileInput" accept="application/xml">
-    <p>Look for an "its.xml" file somewhere in \\52qseu-fs-01pv\Moody_FG\FG Old File Structure\435fts\23
-      FG\74 FS\19. SARM\OEF PLANNING\NEW SARM\4. ARMS PRODUCTS</p>
-    <p hidden>Look for an "its.xml" file somewhere in \\52qseu-fs-01pv\FG Old File Structure\435fts\23
-      FG\75 FS\6. DOT\2. Products\0. 1CO Products</p>
+    <p>Pull an ITS in .pdf summary from ARMS.  Open the .pdf and "save as" XML.  This "ITS.XML" file is what you should be uploading here.</p>
   </div>
-  <div id="fileData" hidden></div>
-  <div id="sliderDiv"></div>
+  <div id="fileData" hidden></div>  
+  <div id="sliderDiv"></div> 
+  <!-- <div id="topRowBtns" class="btn-group" role="group"></div> -->
   <div id="topRowBtns"></div><br>
   <div id="fileDisplayArea"></div>
   <!--************************SCRIPTS*********************-->
@@ -63,75 +45,116 @@ TODO:
     crossorigin="anonymous"></script>
     <script type="text/javascript">
       "use strict";
-      const SHOW_PHA = false;
-      const SHOW_ROBD = false;
-      const OPS_TASK_IDS = ["AE03", "AP01", "AR01", "AR02", "GS03", "LD01", "LD04",
-        "LD19", "LE00", "LE06", "SX06", "TO03", "VV02", "SR12", "LE08", "LE09", "AA03",
-        "GA02", "GA06", "GS06", "LL02", "LL07", "SS06"
+      const SHOW_PHA = true;
+      const SHOW_ROBD = true;
+      const SHOW_IF_NO_DUE_DATE = false;
+      const OPS_TASK_IDS = ["AE03", "AP01", "AR01", "AR02", "GS03", "LD01", "LD04", "LD19", "LE00", "LE06", "SX06",
+        "TO03", "VV02", "SR12", "LE08", "LE09", "AA03", "GA02", "GA06", "GS06", "LL02", "LL07", "SS06"
       ];
-      const GNG_TASK_IDS = ["LL01", "LL02", "SS01", "SS06", "GS03", "GA02", "GS06",
-        "GA06"
+      const GNG_TASK_IDS = ["LL01", "LL02", "SS01", "SS06", "GS03", "GA02", "GS06", "GA06"];
+      const CMR_TASK_IDS = ["LL01", "LL02", "LL04", "LL05", "LL06", "SS01", "SS02", "SS03", "SS05", "SS06", "SS09",
+        "SQ09", "GS03", "GA39", "GS47", "GS06", "GA06", "GA09"
       ];
-      const CMR_TASK_IDS = ["LL01", "LL02", "LL04", "LL05", "LL06", "SS01", "SS02",
-        "SS03", "SS05", "SS06", "SS09", "SQ09", "GS03", "GA39", "GS47", "GS06", "GA06",
-        "GA09"
+      const ALL_TASK_IDS = ["AA01", "AA03", "AA11", "AA21", "AE03", "AP00", "AP01", "AP02", "AP03", "AP11", "AP13",
+        "AP21",
+        "AP30", "AR00", "AR01", "AR02", "DP02", "EC01", "EC02", "EC04", "EC05", "EC08", "EI02", "EI03", "FF00",
+        "FF01",
+        "FF02", "FF11", "FF12", "FF21", "FF22", "FH03", "FH04", "FH05", "FH06", "FH09", "GA02", "GA03", "GA06",
+        "GA07",
+        "GA09", "GA12", "GA14", "GA17", "GA22", "GA23", "GA39", "GA40", "GA43", "GS03", "GS05", "GS06", "GS25",
+        "GS26",
+        "GS28", "GS29", "GS47", "HH60G", "IE05", "LD00", "LD01", "LD02", "LD04", "LD19", "LE00", "LE03", "LE06",
+        "LE08",
+        "LE09", "LL01", "LL02", "LL03D", "LL04", "LL05", "LL06", "LL06D", "LL07", "ME10", "ME14", "ME28", "ME43",
+        "ME44",
+        "ME45", "ME46", "ME47", "MF07", "MF11", "MF15", "MF16", "MF18", "MF19", "MF20", "MF21", "MF29", "MF30",
+        "MF34",
+        "MF38", "MF39", "MF40", "MF41", "MF42", "MF43", "MF44", "MF45", "MF46", "MF48", "MF49", "MG69", "MG70",
+        "MG71",
+        "MG77", "MT01", "MT12", "MT14", "MT15", "MT17", "MT20", "PP12", "PP13", "RA03", "RA05", "RA06", "RA07",
+        "RA12",
+        "RA13", "RA19", "RA20", "RA21", "RA23", "RA26", "RA28", "RA29", "RA33", "RA35", "RA36", "RA38", "RA39",
+        "RA40",
+        "RA41", "RA46", "RA49", "RA52", "RA72", "RA73", "RA77", "RA78", "RA79", "RA80", "RA81", "RA82", "RA84",
+        "RA85",
+        "RA91", "RB11", "SC01", "SC02", "SC11", "SC12", "SD03", "SE55", "SQ04", "SQ09", "SQ10", "SQ13", "SQ14",
+        "SQ15",
+        "SQ18", "SQ19", "SQ23", "SR00", "SR07", "SR07C", "SR07T", "SR09", "SR10", "SR12", "SR14", "SR15", "SR16",
+        "SR17",
+        "SR18", "SR18C", "SR18T", "SR19", "SR19C", "SR19T", "SR23", "SR23C", "SR23T", "SR24", "SR24C", "SR24T",
+        "SR27",
+        "SR28", "SR28C", "SR33", "SR45", "SR45C", "SR45T", "SR72", "SR72C", "SR72T", "SS01", "SS02", "SS03", "SS05",
+        "SS06",
+        "SS07A", "SS07C", "SS07E", "SS07P", "SS07S", "SS08", "SS09", "SS20", "SS30", "SS32", "ST00", "SV86A", "SV93A",
+        "SX06", "SX07", "SX08", "SX08C", "SX08T", "SX10", "TE01", "TF02", "TF03", "TF04", "TO03", "VV02", "VV03",
+        "WD00",
+        "WD11", "WD12", "WD14", "WD15", "WD20", "WD22", "WD23", "WD24", "WD25", "WD26", "WD27", "WD28", "WD29",
+        "WD31",
+        "WD45", "WD46", "WD47", "WD51", "WD52", "WD53", "WD54", "WD55", "WD56", "WD57"
       ];
 
       function monthAbbrToNum(input, isZeroSubscript) {
-        var re = new RegExp("(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)", "i");
-        if (!re.test(input)) window.alert("In function monthAbbrToNum, " + input +
-          " not recognized as a valid month.");
         isZeroSubscript = arguments.length === 1 ? false : isZeroSubscript;
         var output;
-        switch (input.toLowerCase()) {
-          case "jan":
-            output = 1;
-            break;
-          case "feb":
-            output = 2;
-            break;
-          case "mar":
-            output = 3;
-            break;
-          case "apr":
-            output = 4;
-            break;
-          case "may":
-            output = 5;
-            break;
-          case "jun":
-            output = 6;
-            break;
-          case "jul":
-            output = 7;
-            break;
-          case "aug":
-            output = 8;
-            break;
-          case "sep":
-            output = 9;
-            break;
-          case "oct":
-            output = 10;
-            break;
-          case "nov":
-            output = 11;
-            break;
-          case "dec":
-            output = 12;
-            break;
-          default:
-            output = -1;
+        if (!/[A-Z]{3}/i.test(input)) {
+          output = "Error in function monthAbbrToNum: input received " + "did not match expected format /[A-Z]{3}/.\n" +
+            "(/[A-Z]{3}/i.test(" + input + ") returned false.)";
+        } else {
+          switch (input.toLowerCase()) {
+            case "jan":
+              output = 1;
+              break;
+            case "feb":
+              output = 2;
+              break;
+            case "mar":
+              output = 3;
+              break;
+            case "apr":
+              output = 4;
+              break;
+            case "may":
+              output = 5;
+              break;
+            case "jun":
+              output = 6;
+              break;
+            case "jul":
+              output = 7;
+              break;
+            case "aug":
+              output = 8;
+              break;
+            case "sep":
+              output = 9;
+              break;
+            case "oct":
+              output = 10;
+              break;
+            case "nov":
+              output = 11;
+              break;
+            case "dec":
+              output = 12;
+              break;
+            default:
+              output = "Error in function monthAbbrToNum: " + input + "not recognized as a valid month.";
+          }
         }
-        return isZeroSubscript ? output - 1 : output;
+        if (typeof (output) === "string") {
+          window.alert("function monthAbbrToNum(" + input + ", " + isZeroSubscript + ") is outputting " + output +
+            ", which is a " + "string (vice a number). ");
+          return output;
+        } else if (typeof (output) === "number") {
+          return isZeroSubscript ? output - 1 : output;
+        }
       }
 
       function numToMonAbbr(input, isZeroSubscript) {
         isZeroSubscript = arguments.length === 1 ? false : isZeroSubscript;
         var output;
         if (!/\d{1,2}/i.test(input)) {
-          output = "Error in function monthAbbrToNum: input received " +
-            "did not match expected format /\d+/i.\n" +
+          output = "Error in function monthAbbrToNum: input received " + "did not match expected format /\d+/i.\n" +
             "(/\d+/i.test(" + input + ") returned false.)";
         } else {
           if (isZeroSubscript) {
@@ -175,8 +198,7 @@ TODO:
               output = "DEC";
               break;
             default:
-              output = "Error in function numToMonAbbr: " + input +
-                "not recognized as a valid month.";
+              output = "Error in function numToMonAbbr: " + input + "not recognized as a valid month.";
           }
         }
         return output;
@@ -192,31 +214,38 @@ TODO:
         of explicit conversion of the date and year to numbers.  +"42" is
         shorthand for Number("42") and, in this particular situation,
         accomplishes roughly the same thing as ParseInt("42", 10). */
-        /*TODO: see if this can be written using only one "replace" */
-        /*http://stackoverflow.com/questions/3446170/escape-string-for-use-in-javascript-regex/6969486#6969486*/
-        var re = new RegExp("\(\\d\\d\) \(\[A-Z\]\{3\}\) \(\\d\\d\)", "i");
-        return new Date(+ddMmmYy.replace(re, "$3") + 2000,
-          monthAbbrToNum(ddMmmYy.replace(re, "$2"), true), +ddMmmYy.replace(re, "$1"));
+        /*TODO: figure out how to put the regex (or at least the first part)
+        in a variable so it's not so redundant. */
+        xDay = +ddMmmYy.replace(/<td class="(text-(danger|warning) )?due">(\d\d) ([A-Z]{3}) (\d\d)<\/td>/i, "$3");
+        xMon = monthAbbrToNum(ddMmmYy.replace(
+          /<td class="(text-(danger|warning) )?due">(\d\d) ([A-Z]{3}) (\d\d)<\/td>/i, "$4"), true);
+        xYr = +ddMmmYy.replace(/<td class="(text-(danger|warning) )?due">(\d\d) ([A-Z]{3}) (\d\d)<\/td>/i, "$5") + 2000;
+        return new Date(xYr, xMon, xDay);
       }
       /* Take in a Date object and convert
       it to a string of format "DD MMM YY". */
       function dateToDd_Mmm_YyString(dateIn) {
         return dateIn.toString()
           .toUpperCase()
-          .replace(/.*([A-Z]{3}) (\d\d) \d\d(\d\d).*/i, "$2 $1 $3");
+          .replace(/.*([A-Z]{3}) (\d\d) \d{2}(\d{2}).*/i, "$2 $1 $3");
       }
 
-      function colorize(warnDate) {
-        $(".due").removeClass("text-danger text-warning");
-        var xDate;
-        $(".due").addClass(function (index) {
-          xDate = dD_Mmm_YyStringToDate($(".due")[index].textContent);
+      function colorize(html, warnDate) {
+        var xDates = html.replace(/<td class="(text-(danger|warning) )?due">(\d\d) ([A-Z]{3}) (\d\d)<\/td>/gi, function (
+          capture) {
+          var xDate = dD_Mmm_YyStringToDate(capture);
+          var dateString = xDate.getDate() + " " + numToMonAbbr(xDate.getMonth(), true) + " " + xDate.getFullYear();
+          dateString = dateString.replace(/(\d+ [A-Z]{3} )\d\d(\d\d)/i, "$1$2");
+          dateString = dateString.replace(/^\d [A-Z]{3} \d\d/i, "0$&");
           if (xDate <= Date.now()) {
-            return "text-danger";
+            return "<td class=\"text-danger due\">" + dateString + "</td>";
           } else if (xDate <= warnDate) {
-            return "text-warning";
+            return "<td class=\"text-warning due\">" + dateString + "</td>";
+          } else {
+            return "<td class=\"due\">" + dateString + "</td>";
           }
         });
+        return xDates;
       }
       /* Generate a list of all the unique task ids found in the file and 
       return them as an array of strings. */
@@ -228,11 +257,11 @@ TODO:
           .match(/ [A-Z]{2}\d{2}[A-Z]? /gi);
         for (var i = 0; i < modXml.length; i++) {
           modXml[i] = modXml[i].replace(/\s*/g, "");
-          if (outputStr.indexOf(modXml[i].valueOf()) === -1 && modXml[i] !== "") {
+          if (outputStr.indexOf(modXml[i].valueOf()) === -1 && modXml[i] !== ""){
             outputStr += modXml[i] + ".";
           }
         }
-        return outputStr.split(".").sort().splice(1);
+        return outputStr.split(".").sort().splice(1);        
       }
 
       /* TODO: automate this so it pulls the task name from the xml */
@@ -776,23 +805,18 @@ TODO:
         for (var i = 0; i < pilotArr.length; i++) {
           currName = pilotArr[i].replace(/NAME: ([A-Z]+) ?,[^]*NAME: \1[^]*?PAGE/i, "$1");
           /* Print the current pilot's name to the top of his/her currency table. */
-          htmlOut += "<table class=\"table table-bordered table-sm\">" +
-            "<thead class=\"thead-inverse\">" + "<tr>" +
-            "<td colspan=\"3\">" + "<h3 class=\"text-center\">" + currName + "</h3>" +
-            "</td></tr>" + "<tr>" +
-            "<th>TASK NAME</th>" + "<th>DATE LAST ACCOMP</th>" + "<th>DATE DUE</th>" +
-            "</tr></thead><tbody>";
+          htmlOut += "<table class=\"table table-bordered table-sm\">" + "<thead class=\"thead-inverse\">" + "<tr>" +
+            "<td colspan=\"3\">" + "<h3 class=\"text-center\">" + currName + "</h3>" + "</td></tr>" + "<tr>" +
+            "<th>TASK NAME</th>" + "<th>DATE LAST ACCOMP</th>" + "<th>DATE DUE</th>" + "</tr></thead><tbody>";
           /* "PHYSICAL DUE DATE" & "PHYSIOLOGICAL..." are special cases due to how
           they are placed on the page.  Can turn on/off their inclusion in each
           pilot's list of currencies using the SHOW_PHA and SHOW_ROBD constants. */
           if (SHOW_PHA) {
-            htmlOut += "<tr>" + pilotArr[i].replace(
-              /NAME[^]*(PHYSICAL) DUE DATE: (\d\d [A-Z]{3} \d\d)?[^]*?PAGE/i,
+            htmlOut += "<tr>" + pilotArr[i].replace(/NAME[^]*(PHYSICAL) DUE DATE: (\d\d [A-Z]{3} \d\d)?[^]*?PAGE/i,
               "<td>PHA</td><td></td><td class=\"due\">$2</td>") + "</tr>";
           }
           if (SHOW_ROBD) {
-            htmlOut += "<tr>" + pilotArr[i].replace(
-              /NAME[^]*(PHYSIOLOGICAL) DUE DATE: (\d\d [A-Z]{3} \d\d)?[^]*?PAGE/i,
+            htmlOut += "<tr>" + pilotArr[i].replace(/NAME[^]*(PHYSIOLOGICAL) DUE DATE: (\d\d [A-Z]{3} \d\d)?[^]*?PAGE/i,
               "<td>ALT CHAMBER/ROBD</td><td></td><td class=\"due\">$2</td>") + "</tr>";
           }
           /* Once the special cases are out of the way, search iteratively for
@@ -823,21 +847,16 @@ TODO:
               dateTds = pilotArr[i].match(re)[0];
               /* IF ... the block of the text contains a date of format "DD MMM YY" followed one space
               later by a single letter*/
-              if (
-                / \d\d (JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC) \d\d ([A-Z]|YES [A-Z]) /i
-                .test(dateTds)) {
+              if (/ \d\d (JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC) \d\d ([A-Z]|YES [A-Z]) /i.test(dateTds)) {
                 dateTds = dateTds.replace(
                   /(^[^]*?\d\d (JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC) \d\d [A-Z]) [^]*$/i,
                   "$1");
-                var dateArr = dateTds.match(
-                  /\d\d (JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC) \d\d/g);
-                if (dateArr.length === 1) {
-                  htmlOut += "<tr><td>" + getTaskNameFromId(taskId) + " (" + taskId +
-                    ")</td><td>" + dateArr[0] +
-                    "</td><td></td></tr>";
+                var dateArr = dateTds.match(/\d\d (JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC) \d\d/g);
+                if (dateArr.length === 1 && SHOW_IF_NO_DUE_DATE) {
+                  htmlOut += "<tr><td>" + getTaskNameFromId(taskId) + " (" + taskId + ")</td><td>" + dateArr[0] +
+                    "</td><td class=\"due\"></td></tr>";
                 } else if (dateArr.length === 2) {
-                  htmlOut += "<tr><td>" + getTaskNameFromId(taskId) + " (" + taskId +
-                    ")</td><td>" + dateArr[0] +
+                  htmlOut += "<tr><td>" + getTaskNameFromId(taskId) + " (" + taskId + ")</td><td>" + dateArr[0] +
                     "</td><td class=\"due\">" + dateArr[1] + "</td></tr>";
                 }
               }
@@ -845,8 +864,7 @@ TODO:
           }
           htmlOut += "</tbody><tfoot class=\"small\"></tfoot></table>";
         }
-        $("#fileDisplayArea")[0].innerHTML = htmlOut;
-        colorize(NOW_PLUS_X_DAYS($("#cautionSlider")[0].value));
+        $("#fileDisplayArea")[0].innerHTML = colorize(htmlOut, NOW_PLUS_X_DAYS(7));
       }
 
       function makeBtns(xml) {
@@ -865,29 +883,29 @@ TODO:
           printCurrencies(xml, CMR_TASK_IDS)
         });
         $("#allBtn")[0].addEventListener("click", function () {
-          printCurrencies(xml, getAllTaskIds(xml))
+          printCurrencies(xml, ALL_TASK_IDS)
         });
       }
 
-      function makeSlider() {
+      function makeSlider(){
         /* 
         http://thenewcode.com/757/Playing-With-The-HTML5-range-Slider-Input
         http://seiyria.com/bootstrap-slider/ 
         */
-        $("#sliderDiv")[0].innerHTML +=
-          "<label for=\"cautionSlider\">Highlight yellow if within " +
-          "<strong><span id=\"cautionSetting\">7</span></strong>" +
-          " days.</label>" +
-          "<p><input type=\"range\" min=\"1\" max=\"90\" value=\"7\" id=\"cautionSlider\" step=\"1\" list=\"cautionOptions\"></p>" +
-          "<datalist id=\"cautionOptions\">" +
-          "<option>7</option><option>30</option><option>60</option><option>90</option>" +
-          "</datalist>";
-        $("#cautionSlider")[0].addEventListener("mouseup", function () {
+        $("#sliderDiv")[0].innerHTML += 
+        "<label for=\"cautionSlider\">Highlight yellow if within " + 
+        "<strong><span id=\"cautionSetting\">7</span></strong>" + 
+        " days.</label>" + 
+        "<p><input type=\"range\" min=\"1\" max=\"90\" value=\"7\" id=\"cautionSlider\" step=\"1\" list=\"cautionOptions\"></p>" + 
+        "<datalist id=\"cautionOptions\">" + "<option>7</option><option>30</option><option>60</option><option>90</option>" + 
+        "</datalist>";
+        $("#cautionSlider")[0].addEventListener("mouseup", function(){
           $("#cautionSetting")[0].innerHTML = $("#cautionSlider")[0].value;
-          colorize(NOW_PLUS_X_DAYS($("#cautionSlider")[0].value));
+          $("#fileDisplayArea")[0].innerHTML = colorize($("#fileDisplayArea")[0].innerHTML, NOW_PLUS_X_DAYS($(
+          "#cautionSlider")[0].value));
         });
       }
-
+      
       $("#fileInput")[0].addEventListener("change", function () {
         if (this.files[0].type.match(/text.*/)) {
           var file = this.files[0];
@@ -896,18 +914,16 @@ TODO:
             /*
             $("#fileData")[0].innerHTML = "File Name: " + file.name < file.name > +"<br>File " + "Type: " + file.type + "<br>Last Modified: " + dateToDd_Mmm_YyString(file.lastModifiedDate) + "<br>File Size: " + (file.size / 1048576).toFixed(3) + "MB";
             */
-            $("#mainHeader")[0].innerHTML += "<p class=\"small\">CAO: " +
-              dateToDd_Mmm_YyString(file.lastModifiedDate) + "</p>";
+            $("#mainHeader")[0].innerHTML += "<p class=\"small\">CAO: " + dateToDd_Mmm_YyString(file.lastModifiedDate) + "</p>";
             $("#fileInputJumbotron").attr("hidden", true);
-            // $("#sliderDiv").attr("hidden", false);
-            /* TODO: store reader.result somewhere useful (<div id="rawXml" hidden><p>raw xml</p></div>?) */
+            /* TODO: store reader.result somewhere useful (hidden <div id="rawXml"><p>raw xml</p></div>?) */
             makeSlider();
-            makeBtns(reader.result);
-            printCurrencies(reader.result, OPS_TASK_IDS);
+            var currList = getAllTaskIds(reader.result);
+            printCurrencies(reader.result, currList);                      
           };
           reader.readAsText(file);
         } else {
-          $("#fileDisplayArea")[0].innerText = "File not supported.";
+          $("#fileDisplayArea")[0].innerText = "File not supported!";
         }
       }, false);
     </script>
