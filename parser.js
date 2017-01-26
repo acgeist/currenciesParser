@@ -836,7 +836,9 @@ $("#fileInput")[0].addEventListener("change", function () {
         dateToDd_Mmm_YyString(file.lastModifiedDate) + "</p>";
       $("#fileInputJumbotron").attr("hidden", true);
       // $("#sliderDiv").attr("hidden", false);
-      /* TODO: store reader.result somewhere useful (<div id="rawXml" hidden><p>raw xml</p></div>?) */
+      /* TODO: store reader.result somewhere useful (<div id="rawXml" hidden><p>raw xml</p></div>?) 
+      http://api.jquery.com/data/
+      */
       makeSlider();
       makeBtns(reader.result);
       printCurrencies(reader.result, OPS_TASK_IDS);
