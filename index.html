@@ -14,7 +14,9 @@ TODO:
 -Clean up formatting/layout so it's less crowded at the top of the page
 -Make each pilot's table collapse?
 -DOT sort by date? http://stackoverflow.com/questions/10123953/sort-javascript-object-array-by-date
-
+-sanitize an ITS to use as an example
+-Don't show pilot if no tasks are found.
+-Decide how to show tasks where accomplishment matters but due dates don't (e.g. SS01).
 -->
 <!doctype html>
 <html lang="en-US">
@@ -29,53 +31,54 @@ TODO:
   <!-- favicon from https://commons.wikimedia.org/wiki/File:GAU-8A_Avenger_Gatling_gun_front.jpg 
   (modified using http://www.favicon-generator.org/) -->
   <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css"
-    integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
-    <style>
-      body {
-        margin-left: 10%;
-        margin-right: 10%;
-        margin-top: 2%;
-      }
-      
-       ::-ms-tooltip {
-        display: none;
-      }
-    </style>
-</head>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ"
+    crossorigin="anonymous" />
+  <link rel="stylesheet" href="style.css" /> </head>
 
 <body>
   <div class="container">
     <div class="page-header" id="mainHeader">
       <h1>
-        <p>23FG Currencies Checker</p>
-        <img alt="74FS Patch" width="287" height="333" style="width: 103px; height: 114px;" src="74fs.png"/> 
-        <img alt="75FS Patch" width="287" height="333" style="width: 103px; height: 114px;" src="75fs.png"/>
-        <img alt="76FS Patch" width="287" height="333" style="width: 103px; height: 114px;" src="76fs.jpg"/>      
-      </h1>
-    </div>
-  <div class="jumbotron" id="fileInputJumbotron"> <input type="file" id="fileInput" accept="application/xml">
-  <p>Pull an ITS in .pdf summary from ARMS.  Open the .pdf and "save as" XML.  This "ITS.XML" file is what you should be uploading here.</p>
-    <p hidden>Look for an "its.xml" file somewhere in \\52qseu-fs-01pv\Moody_FG\FG Old File Structure\435fts\23
-      FG\74 FS\19. SARM\OEF PLANNING\NEW SARM\4. ARMS PRODUCTS</p>
-    <p hidden>Look for an "its.xml" file somewhere in \\52qseu-fs-01pv\FG Old File Structure\435fts\23
-      FG\75 FS\6. DOT\2. Products\0. 1CO Products</p>
+        <p class="text-center">A-10C Currencies Checker</p>
+        <div id = "sqPatches">
+        <img alt="25FS Patch" class = "sqPatchImg" src="25fs.png"/>
+        <img alt="47FS Patch" class = "sqPatchImg" src="47fs.png"/>
+        <img alt="66WPS Patch" class = "sqPatchImg" src="66wps.jpg"/>
+        <img alt="74FS Patch" class = "sqPatchImg" src="74fs.png"/> 
+        <img alt="75FS Patch" class = "sqPatchImg" src="75fs.png"/>
+        <img alt="76FS Patch" class = "sqPatchImg" src="76fs.jpg"/>
+        <img alt="104FS Patch" class = "sqPatchImg" src="104fs.png"/>
+        <img alt="107FS Patch" class = "sqPatchImg" src="107fs.jpg"/>
+        <img alt="163FS Patch" class = "sqPatchImg" src="163fs.jpg"/>
+        <img alt="190FS Patch" class = "sqPatchImg" src="190fs.jpg"/>
+        <img alt="303FS Patch" class = "sqPatchImg" src="303fs.png"/>
+        <img alt="354FS Patch" class = "sqPatchImg" src="354fs.jpg"/>
+        <img alt="357FS Patch" class = "sqPatchImg" src="357fs.jpg"/>
+        <img alt="358FS Patch" class = "sqPatchImg" src="358fs.jpg"/>
+        <img alt="422TES Patch" class = "sqPatchImg" src="422tes.jpg"/>
+        <!-- to add: AATC? -->
+      </div>
+    </h1> 
   </div>
-  <div id="fileData" hidden></div>
-  <div id="sliderDiv"></div>
-  <div id="topRowBtns"></div><br>
-  <div id="fileDisplayArea"></div>
-  <!--************************SCRIPTS*********************-->
-  <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n"
-    crossorigin="anonymous"></script>
-    <script src="parser.js" type="text/javascript"></script>
-    <script type="text/javascript">
-      
-    </script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb"
+    <div class="jumbotron" id="fileInputJumbotron"> <input type="file" id="fileInput" accept="application/xml">
+      <p>Ask your unit's SARM/1C0s to pull an ITS for all the unit's pilots in .pdf format from ARMS. Open the .pdf and "save
+        as" XML. This "ITS.XML" file is what you should be uploading here.</p>
+    </div>
+    <div id="fileData" hidden></div> <span id="sliderDiv"></span>
+    <div id="topRowBtns"></div><br>
+    <div id="fileDisplayArea"></div>
+    <!--************************SCRIPTS*********************-->
+    <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n"
       crossorigin="anonymous"></script>
-      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn"
+      <script src="parser.js" type="text/javascript"></script>
+      <script type="text/javascript">
+
+
+      </script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb"
         crossorigin="anonymous"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn"
+          crossorigin="anonymous"></script>
 </body>
 
 </html>

@@ -1,4 +1,32 @@
-"use strict";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: parser.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: parser.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>"use strict";
 /** 
  * Hard-coded list of task IDs for A-10 pilots to review while preparing to fly.
  * @constant OPS_TASK_IDS
@@ -9,7 +37,7 @@ const OPS_TASK_IDS = ["AE03", "AP01", "AR01", "AR02", "GS03", "LD01", "LD04",
   "GA02", "GA06", "GS06", "LL02", "LL07", "SS06"
 ];
 /** 
- * Hard-coded list of grounding task IDs for A-10 pilots
+ * hard-coded list of grounding task IDs for A-10 pilots
  * @constant GNG_TASK_IDS
  * @type {string[]} 
  * @default */
@@ -25,18 +53,6 @@ const CMR_TASK_IDS = ["LL01", "LL02", "LL04", "LL05", "LL06", "SS01", "SS02",
   "SS03", "SS05", "SS06", "SS09", "SQ09", "GS03", "GA39", "GS47", "GS06", "GA06",
   "GA09"
 ];
-/** 
- * List of task IDs that affect night currency for A-10 pilots. Excludes the following:
- * SIM WD NIGHT (MG69)
- * SELF MK STRF NT (RA84)
- * CAS NIGHT (SR19)
- * CAS NIGHT TSP (SR19T)
- * SA NIGHT (SR28)
- * BSA NIGHT (SR33)
- * @constant NT_TASK_IDS
- * @type {string[]} 
- * @default */
-const NT_TASK_IDS = ["TE01", "VV02", "LD02", "LD19", "AR02", "WD47"];
 /**
  * Converts the string name of a month (including abbreviations) to an integer.  Case insensitive, accepts leading/trailing whitespace.
  * @param {string} input - the name of the month.
@@ -66,6 +82,7 @@ function monthAbbrToNum(input, isZeroSubscript) {
     return -1;
   } else {
     xInput = input.replace(re, "$1");
+    console.log(xInput);
   }
   switch (xInput.toLowerCase()) {
   case "jan":
@@ -118,7 +135,7 @@ function monthAbbrToNum(input, isZeroSubscript) {
   default:
     output = -1;
   }
-  return isZeroSubscript && output !== -1 ? output - 1 : output;
+  return isZeroSubscript &amp;&amp; output !== -1 ? output - 1 : output;
 }
 /**
  * Converts an integer of the range 0-12 to 3-letter month abbreviation.
@@ -145,14 +162,14 @@ function numToMonAbbr(input, isZeroSubscript) {
   isZeroSubscript = input === 0 ? true : isZeroSubscript;
   if (typeof(input) === "boolean"){
     return null;
-  } else if (typeof (input) !== "number" && isNaN(input)) {
+  } else if (typeof (input) !== "number" &amp;&amp; isNaN(input)) {
     return null;
   } else {
     input = +input;
   }
 
   input = Math.round(input);
-  if (input < 0 || input > 12) {
+  if (input &lt; 0 || input > 12) {
     return null;
   }
   input = isZeroSubscript ? input + 1 : input;
@@ -244,26 +261,26 @@ function colorize(warnDate) {
   $(".due")
     .addClass((index) => {
       xDate = dD_Mmm_YyStringToDate($(".due")[index].textContent);
-      if (xDate <= Date.now()) {
+      if (xDate &lt;= Date.now()) {
         return "text-danger";
-      } else if (xDate <= warnDate) {
+      } else if (xDate &lt;= warnDate) {
         return "text-warning";
       }
     });
 }
 /**
- *  Generates a list of all the unique task ids found in an xml string and return the list as an array of strings.  This is accomplished by using regular expressions to remove tags and whitespace, then search for a character sequence matching <code>/ [A-Z]{2}\d{2}[A-Z]? /gi</code>
+ *  Generates a list of all the unique task ids found in an xml string and return the list as an array of strings.  This is accomplished by using regular expressions to remove tags and whitespace, then search for a character sequence matching &lt;code>/ [A-Z]{2}\d{2}[A-Z]? /gi&lt;/code>
  * @param {string} xml - the xml string to be searched for task IDs
  * @returns {string[]} - an array of 4-5 character strings (e.g. ["AA00, AA00A, ..."]).
  */
 function getAllTaskIds(xml) {
   var outputStr = "";
-  var modXml = xml.replace(/(<\/?(TD|TR|TH|TABLE|P|DIV)\/?>)|\n+/ig, " ")
+  var modXml = xml.replace(/(&lt;\/?(TD|TR|TH|TABLE|P|DIV)\/?>)|\n+/ig, " ")
     .replace(/\s{2,}/g, " ")
     .match(/ [A-Z]{2}\d{2}[A-Z]? /gi);
-  for (var i = 0; i < modXml.length; i++) {
+  for (var i = 0; i &lt; modXml.length; i++) {
     modXml[i] = modXml[i].replace(/\s*/g, "");
-    if (outputStr.indexOf(modXml[i].valueOf()) === -1 && modXml[i] !== "") {
+    if (outputStr.indexOf(modXml[i].valueOf()) === -1 &amp;&amp; modXml[i] !== "") {
       outputStr += modXml[i] + ".";
     }
   }
@@ -273,7 +290,7 @@ function getAllTaskIds(xml) {
 }
 /**
  * Convert a task ID to a task name.  Relies on a hard-coded bank of known task IDs (i.e. task names are not generated automatically from the xml).
- * @param {string} input - the task ID to look up.  Should match format <code>/ [A-Z]{2}\d{2}[A-Z]? /gi</code>
+ * @param {string} input - the task ID to look up.  Should match format &lt;code>/ [A-Z]{2}\d{2}[A-Z]? /gi&lt;/code>
  * @returns {string} - the task name. 
  * @example
  * // returns "SEPT"
@@ -804,44 +821,38 @@ function getTaskNameFromId(input) {
   }
 }
 
-/**
- * Take an XML string and remove all tags and whitespace.
- * @param {string} xmlIn - the XML string to be cleansed
- * @returns {string} - a string of tokens separated by a single whitespace.
- */
-function cleanseXml(xmlIn){
-  return xmlIn.replace(/(<\/?[a-zA-Z]*\/?>)|\n+/ig, " ").replace(/\s{2,}/ig, " ");
-}
-
 function printCurrencies(xml, taskIds, showPha, showRobd) {
   var dateTds, taskId, re, currName, pilotArr;
   var htmlOut = "";
-  xml = cleanseXml(xml);
+  /* strip HTML tags and whitespace.  The xml is now a block of
+  text with tokens separated by a single space. */
+  xml = xml.replace(/(&lt;\/?(TD|TR|TH|TABLE|P|DIV)\/?>)|\n+/ig, " ")
+    .replace(/\s+/g, " ");
   /* Slice the xml into an array of pilots.  Each array member contains from
   the first time that pilot's name is mentioned to the page number declaration
   on the last page that has their name.  Read up on greedy vs. reluctant to
   see how it works and use https://regexper.com to visualize it. */
-  pilotArr = xml.match(/NAME: ([a-zA-Z'-]+) ?,[^]*NAME: \1[^]*?PAGE/gi);
-  for (var i = 0; i < pilotArr.length; i++) {
-    currName = pilotArr[i].replace(/NAME: ([a-zA-Z'-]+) ?,[^]*NAME: \1[^]*?PAGE/i, "$1");
+  pilotArr = xml.match(/NAME: ([A-Z]+) ?,[^]*NAME: \1[^]*?PAGE/gi);
+  for (var i = 0; i &lt; pilotArr.length; i++) {
+    currName = pilotArr[i].replace(/NAME: ([A-Z]+) ?,[^]*NAME: \1[^]*?PAGE/i, "$1");
     /* Print the current pilot's name to the top of his/her currency table. */
-    htmlOut += "<table class=\"table table-bordered table-sm\">" + "<thead class=\"thead-inverse\">" + "<tr>" +
-      "<td colspan=\"3\">" + "<h3 class=\"text-center\">" + currName + "</h3>" + "</td></tr>" + "<tr>" +
-      "<th>TASK NAME</th>" + "<th>DATE LAST ACCOMP</th>" + "<th>DATE DUE</th>" + "</tr></thead><tbody>";
-    /* "PHYSICAL DUE DATE" & "PHYSIOLOGICAL..." are special cases due to how
+    htmlOut += "&lt;table class=\"table table-bordered table-sm\">" + "&lt;thead class=\"thead-inverse\">" + "&lt;tr>" +
+      "&lt;td colspan=\"3\">" + "&lt;h3 class=\"text-center\">" + currName + "&lt;/h3>" + "&lt;/td>&lt;/tr>" + "&lt;tr>" +
+      "&lt;th>TASK NAME&lt;/th>" + "&lt;th>DATE LAST ACCOMP&lt;/th>" + "&lt;th>DATE DUE&lt;/th>" + "&lt;/tr>&lt;/thead>&lt;tbody>";
+    /* "PHYSICAL DUE DATE" &amp; "PHYSIOLOGICAL..." are special cases due to how
     they are placed on the page.  Can turn on/off their inclusion in each
     pilot's list of currencies using the SHOW_PHA and SHOW_ROBD constants. */
     if (showPha) {
-      htmlOut += "<tr>" + pilotArr[i].replace(/NAME[^]*(PHYSICAL) DUE DATE: (\d\d [A-Z]{3} \d\d)?[^]*?PAGE/i,
-        "<td>PHA</td><td></td><td class=\"due\">$2</td>") + "</tr>";
+      htmlOut += "&lt;tr>" + pilotArr[i].replace(/NAME[^]*(PHYSICAL) DUE DATE: (\d\d [A-Z]{3} \d\d)?[^]*?PAGE/i,
+        "&lt;td>PHA&lt;/td>&lt;td>&lt;/td>&lt;td class=\"due\">$2&lt;/td>") + "&lt;/tr>";
     }
     if (showRobd) {
-      htmlOut += "<tr>" + pilotArr[i].replace(/NAME[^]*(PHYSIOLOGICAL) DUE DATE: (\d\d [A-Z]{3} \d\d)?[^]*?PAGE/i,
-        "<td>ALT CHAMBER/ROBD</td><td></td><td class=\"due\">$2</td>") + "</tr>";
+      htmlOut += "&lt;tr>" + pilotArr[i].replace(/NAME[^]*(PHYSIOLOGICAL) DUE DATE: (\d\d [A-Z]{3} \d\d)?[^]*?PAGE/i,
+        "&lt;td>ALT CHAMBER/ROBD&lt;/td>&lt;td>&lt;/td>&lt;td class=\"due\">$2&lt;/td>") + "&lt;/tr>";
     }
     /* Once the special cases are out of the way, search iteratively for
     every task id in taskIds. */
-    for (var j = 0; j < taskIds.length; j++) {
+    for (var j = 0; j &lt; taskIds.length; j++) {
       taskId = taskIds[j];
       re = new RegExp(taskId, "i");
       /* IF ... the current task name is even found in the current
@@ -872,16 +883,16 @@ function printCurrencies(xml, taskIds, showPha, showRobd) {
             "$1");
           var dateArr = dateTds.match(/\d\d (JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC) \d\d/g);
           if (dateArr.length === 1) {
-            htmlOut += "<tr><td>" + getTaskNameFromId(taskId) + " (" + taskId + ")</td><td>" + dateArr[0] +
-              "</td><td></td></tr>";
+            htmlOut += "&lt;tr>&lt;td>" + getTaskNameFromId(taskId) + " (" + taskId + ")&lt;/td>&lt;td>" + dateArr[0] +
+              "&lt;/td>&lt;td>&lt;/td>&lt;/tr>";
           } else if (dateArr.length === 2) {
-            htmlOut += "<tr><td>" + getTaskNameFromId(taskId) + " (" + taskId + ")</td><td>" + dateArr[0] +
-              "</td><td class=\"due\">" + dateArr[1] + "</td></tr>";
+            htmlOut += "&lt;tr>&lt;td>" + getTaskNameFromId(taskId) + " (" + taskId + ")&lt;/td>&lt;td>" + dateArr[0] +
+              "&lt;/td>&lt;td class=\"due\">" + dateArr[1] + "&lt;/td>&lt;/tr>";
           }
         }
       }
     }
-    htmlOut += "</tbody><tfoot class=\"small\"></tfoot></table>";
+    htmlOut += "&lt;/tbody>&lt;tfoot class=\"small\">&lt;/tfoot>&lt;/table>";
   }
   $("#fileDisplayArea")[0].innerHTML = htmlOut;
   colorize(NOW_PLUS_X_DAYS($("#cautionSlider")[0].value));
@@ -889,35 +900,22 @@ function printCurrencies(xml, taskIds, showPha, showRobd) {
 
 function makeBtns(xml) {
   $("#topRowBtns")[0].innerHTML +=
-    "<button type=\"button\" class=\"btn btn-secondary\" id=\"opsBtn\">Ops Desk</button>" +
-    "<button type=\"button\" class=\"btn btn-secondary\" id=\"gngBtn\">GO/NO-GO</button>" +
-    "<button type=\"button\" class=\"btn btn-secondary\" id=\"cmrBtn\">CMR</button>" +
-    "<button type=\"button\" class=\"btn btn-secondary\" id=\"ntBtn\">Night</button>" +
-    "<button type=\"button\" class=\"btn btn-secondary\" id=\"allBtn\">ALL</button>";
-  $("#opsBtn")[0].addEventListener("click", () => {
+    "&lt;button type=\"button\" class=\"btn btn-secondary\" id=\"opsBtn\">Ops Desk&lt;/button>" +
+    "&lt;button type=\"button\" class=\"btn btn-secondary\" id=\"gngBtn\">GO/NO-GO&lt;/button>" +
+    "&lt;button type=\"button\" class=\"btn btn-secondary\" id=\"cmrBtn\">CMR&lt;/button>" +
+    "&lt;button type=\"button\" class=\"btn btn-secondary\" id=\"allBtn\">ALL&lt;/button>";
+  $("#opsBtn")[0].addEventListener("click", function () {
     printCurrencies(xml, OPS_TASK_IDS, false, false);
   });
-  $("#gngBtn")[0].addEventListener("click", () => {
+  $("#gngBtn")[0].addEventListener("click", function () {
     printCurrencies(xml, GNG_TASK_IDS, true, true);
   });
-  $("#cmrBtn")[0].addEventListener("click", () => {
+  $("#cmrBtn")[0].addEventListener("click", function () {
     printCurrencies(xml, CMR_TASK_IDS, true, true);
   });
-  $("#ntBtn")[0].addEventListener("click", () =>{
-    printCurrencies(xml, NT_TASK_IDS, false, false);
-  });
-  $("#allBtn")[0].addEventListener("click", () => {
+  $("#allBtn")[0].addEventListener("click", function () {
     printCurrencies(xml, getAllTaskIds(xml), true, true);
   });
-}
-
-function getPreparedDateFromXml(xml){
-  var re = /PREPARED \d\d (JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC) \d{4}/gi;
-  if (re.test(cleanseXml(xml))){
-    return cleanseXml(xml).match(re)[0].replace(/PREPARED /i, "retrieved from ARMS ");
-  } else {
-    return "unknown";
-  }
 }
 
 function makeSlider() {
@@ -925,11 +923,11 @@ function makeSlider() {
   http://thenewcode.com/757/Playing-With-The-HTML5-range-Slider-Input
   http://seiyria.com/bootstrap-slider/ 
   */
-  $("#sliderDiv")[0].innerHTML += "<label for=\"cautionSlider\">Highlight yellow if coming due within " +
-    "<strong><span id=\"cautionSetting\">7</span></strong>" + " days.</label>" +
-    "<br><input type=\"range\" min=\"1\" max=\"90\" value=\"7\" id=\"cautionSlider\" step=\"1\" list=\"cautionOptions\">" +
-    "<datalist id=\"cautionOptions\">" + "<option>7</option><option>30</option><option>60</option><option>90</option>" +
-    "</datalist>";
+  $("#sliderDiv")[0].innerHTML += "&lt;label for=\"cautionSlider\">Highlight yellow if within " +
+    "&lt;strong>&lt;span id=\"cautionSetting\">7&lt;/span>&lt;/strong>" + " days.&lt;/label>" +
+    "&lt;p>&lt;input type=\"range\" min=\"1\" max=\"90\" value=\"7\" id=\"cautionSlider\" step=\"1\" list=\"cautionOptions\">&lt;/p>" +
+    "&lt;datalist id=\"cautionOptions\">" + "&lt;option>7&lt;/option>&lt;option>30&lt;/option>&lt;option>60&lt;/option>&lt;option>90&lt;/option>" +
+    "&lt;/datalist>";
   $("#cautionSlider")[0].addEventListener("mouseup", function () {
     $("#cautionSetting")[0].innerHTML = $("#cautionSlider")[0].value;
     colorize(NOW_PLUS_X_DAYS($("#cautionSlider")[0].value));
@@ -940,11 +938,15 @@ $("#fileInput")[0].addEventListener("change", function () {
     var file = this.files[0];
     var reader = new FileReader();
     reader.onload = function () {
-      $("#fileData")[0].innerHTML = "File Name: " + file.name + "<br>File Type: " + file.type + "<br>Last Modified: " + dateToDd_Mmm_YyString(file.lastModifiedDate) + "<br>File Size: " + (file.size / 1048576).toFixed(3) + "MB";
-      $("#mainHeader")[0].innerHTML += "<p class=\"small\">*ITS " + getPreparedDateFromXml(reader.result) +
-        "</p>";
-      $("#fileInputJumbotron").attr("hidden", true);
-      /* TODO: store reader.result somewhere useful (<div id="rawXml" hidden><p>raw xml</p></div>?) 
+      /*
+      $("#fileData")[0].innerHTML = "File Name: " + file.name &lt; file.name > +"&lt;br>File " + "Type: " + file.type + "&lt;br>Last Modified: " + dateToDd_Mmm_YyString(file.lastModifiedDate) + "&lt;br>File Size: " + (file.size / 1048576).toFixed(3) + "MB";
+      */
+      $("#mainHeader")[0].innerHTML += "&lt;p class=\"small\">CAO: " + dateToDd_Mmm_YyString(file.lastModifiedDate) +
+        "&lt;/p>";
+      $("#fileInputJumbotron")
+        .attr("hidden", true);
+      // $("#sliderDiv").attr("hidden", false);
+      /* TODO: store reader.result somewhere useful (&lt;div id="rawXml" hidden>&lt;p>raw xml&lt;/p>&lt;/div>?) 
       http://api.jquery.com/data/
       */
       makeSlider();
@@ -956,3 +958,26 @@ $("#fileInput")[0].addEventListener("change", function () {
     $("#fileDisplayArea")[0].innerText = "File not supported.";
   }
 }, false);
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#CMR_TASK_IDS">CMR_TASK_IDS</a></li><li><a href="global.html#colorize">colorize</a></li><li><a href="global.html#dateToDd_Mmm_YyString">dateToDd_Mmm_YyString</a></li><li><a href="global.html#dD_Mmm_YyStringToDate">dD_Mmm_YyStringToDate</a></li><li><a href="global.html#getAllTaskIds">getAllTaskIds</a></li><li><a href="global.html#getTaskNameFromId">getTaskNameFromId</a></li><li><a href="global.html#GNG_TASK_IDS">GNG_TASK_IDS</a></li><li><a href="global.html#monthAbbrToNum">monthAbbrToNum</a></li><li><a href="global.html#NOW_PLUS_X_DAYS">NOW_PLUS_X_DAYS</a></li><li><a href="global.html#numToMonAbbr">numToMonAbbr</a></li><li><a href="global.html#OPS_TASK_IDS">OPS_TASK_IDS</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Mon Jan 30 2017 01:16:13 GMT-0500 (Eastern Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

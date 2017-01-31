@@ -1,0 +1,26 @@
+body {
+  margin-left: 10%;
+  margin-right: 10%;
+  margin-top: 2%;
+}
+
+ ::-ms-tooltip {
+  display: none;
+}
+
+.simpleBorder {
+  outline: 1px solid black;
+}
+
+.sqPatchImg {
+  /* TODO: make this auto-gonk the sizing based on how many patches there are */
+  /* TODO: switch to Friday patches on Friday? */
+  /* height: 4rem; */
+  width: 5.3333%;
+  width: calc(80%/15);
+}
+#sqPatches{
+  display: block;
+  margin: auto;
+  text-align: center;
+}
