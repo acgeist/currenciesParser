@@ -1,17 +1,29 @@
-body {
+th{
+  vertical-align: text-top;
+}
+.DOT-table{
+  font-size: .74em;
+  line-height: 1;
+}
+.pageHeader, #fileData, #mainHeader {
   margin-left: 10%;
   margin-right: 10%;
   margin-top: 2%;
 }
-
+.jumbotron, #topRowBtns, #fileDisplayArea, #sliderDiv, #cautionSlider {
+  margin-left: 3%;
+  margin-right: 3%;
+}
+td{
+  white-space: nowrap;
+  margin: auto;
+}
  ::-ms-tooltip {
   display: none;
 }
-
-.simpleBorder {
-  outline: 1px solid black;
+.centered{
+  text-align: center;
 }
-
 .sqPatchImg {
   /* TODO: make this auto-gonk the sizing based on how many patches there are */
   /* TODO: switch to Friday patches on Friday? */

@@ -4,27 +4,23 @@
  * @constant OPS_TASK_IDS
  * @type {string[]} 
  * @default */
-const OPS_TASK_IDS = ["AE03", "AP01", "AR01", "AR02", "GS03", "LD01", "LD04",
-  "LD19", "LE00", "LE06", "SX06", "TO03", "VV02", "SR12", "LE08", "LE09", "AA03",
-  "GA02", "GA06", "GS06", "LL02", "LL07", "SS06"
-];
+const OPS_TASK_IDS = "AE03 AP01 AR01 AR02 GS03 LD01 LD04 LD19 LE00 LE06 SX06 TO03 VV02 SR12 LE08 LE09 AA03 GA02 GA06 GS06 LL02 LL07 SS06".split(" ");
 /** 
  * Hard-coded list of grounding task IDs for A-10 pilots
  * @constant GNG_TASK_IDS
  * @type {string[]} 
  * @default */
-const GNG_TASK_IDS = ["LL01", "LL02", "SS01", "SS06", "GS03", "GA02", "GS06",
-  "GA06"
-];
+//const GNG_TASK_IDS = ["AA03", "AA21", "GA02", "GA06", "GS03", "GS06", "LL01", "LL02", "LL07", "MT17", "PP12", "SS01",
+//  "SS06"
+//];
+const GNG_TASK_IDS = "AA03 AA21 GA02 GA06 GS03 GS06 LL01 LL02 LL07 MT17 PP12 SS01 SS06".split(" ");
 /** 
- * List of task IDs that affect CMR status for A-10 pilots.
+ * List of task IDs that affect CMR status for A-10 pilots.  List excludes:
+ * AE03, AR01, PP12, SS01
  * @constant CMR_TASK_IDS
  * @type {string[]} 
  * @default */
-const CMR_TASK_IDS = ["LL01", "LL02", "LL04", "LL05", "LL06", "SS01", "SS02",
-  "SS03", "SS05", "SS06", "SS09", "SQ09", "GS03", "GA39", "GS47", "GS06", "GA06",
-  "GA09"
-];
+const CMR_TASK_IDS = "GA06 GA09 GA39 GS03 GS06 GS47 LL01 LL02 LL04 LL05 LL06 SQ09 SS02 SS03 SS05 SS06 SS09".split(" ");
 /** 
  * List of task IDs that affect night currency for A-10 pilots. Excludes the following:
  * SIM WD NIGHT (MG69)
@@ -36,7 +32,7 @@ const CMR_TASK_IDS = ["LL01", "LL02", "LL04", "LL05", "LL06", "SS01", "SS02",
  * @constant NT_TASK_IDS
  * @type {string[]} 
  * @default */
-const NT_TASK_IDS = ["TE01", "VV02", "LD02", "LD19", "AR02", "WD47"];
+const NT_TASK_IDS = ["TE01", "VV02"];
 /**
  * Converts the string name of a month (including abbreviations) to an integer.  Case insensitive, accepts leading/trailing whitespace.
  * @param {string} input - the name of the month.
@@ -57,6 +53,9 @@ const NT_TASK_IDS = ["TE01", "VV02", "LD02", "LD19", "AR02", "WD47"];
  * monthAbbrToNum(undefined);                   // returns -1
  * monthAbbrToNum(true);                        // returns -1
  */
+
+const BLANK_DATE = new Date(9999,11,31);
+
 function monthAbbrToNum(input, isZeroSubscript) {
   isZeroSubscript = arguments.length === 1 ? false : isZeroSubscript;
   var xInput, output;
@@ -138,19 +137,18 @@ function monthAbbrToNum(input, isZeroSubscript) {
  * numToMonAbbr(undefined);  //returns null
  * numToMonAbbr(-5);         //returns null
  */
-function numToMonAbbr(input, isZeroSubscript) {
+/* function numToMonAbbr(input, isZeroSubscript) {
   //TODO: include bitwise error codes?
   var output;
   isZeroSubscript = arguments.length === 1 ? false : isZeroSubscript;
   isZeroSubscript = input === 0 ? true : isZeroSubscript;
-  if (typeof(input) === "boolean"){
+  if (typeof (input) === "boolean") {
     return null;
   } else if (typeof (input) !== "number" && isNaN(input)) {
     return null;
   } else {
     input = +input;
   }
-
   input = Math.round(input);
   if (input < 0 || input > 12) {
     return null;
@@ -197,7 +195,7 @@ function numToMonAbbr(input, isZeroSubscript) {
     return null;
   }
   return output;
-}
+} */
 /**
  * Returns a date object representing the current time plus a given number of days.
  * @param {number} numDays - how many days to add to the current time
@@ -219,8 +217,9 @@ function dD_Mmm_YyStringToDate(ddMmmYy) {
   accomplishes roughly the same thing as ParseInt("42", 10). */
   /*TODO: see if this can be written using only one "replace" */
   /*http://stackoverflow.com/questions/3446170/escape-string-for-use-in-javascript-regex/6969486#6969486*/
-  var re = new RegExp("\(\\d\\d\) \(\[A-Z\]\{3\}\) \(\\d\\d\)", "i");
-  return new Date(+ddMmmYy.replace(re, "$3") + 2000, monthAbbrToNum(ddMmmYy.replace(re, "$2"), true), +ddMmmYy.replace(
+  var re = /(\d\d) (JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC) (\d\d)/i;
+  var century = +ddMmmYy.replace(re, "$3") > 50 ? 1900 : 2000; // Assumes the only dates entered will be between 1950 and 2049.
+  return new Date(+ddMmmYy.replace(re, "$3") + century, monthAbbrToNum(ddMmmYy.replace(re, "$2"), true), +ddMmmYy.replace(
     re, "$1"));
 }
 /**
@@ -233,6 +232,30 @@ function dateToDd_Mmm_YyString(dateIn) {
     .toUpperCase()
     .replace(/.*([A-Z]{3}) (\d\d) \d\d(\d\d).*/i, "$2 $1 $3");
 }
+function getCellSortValue(cellContent){
+  if (/(\d\d) (JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC) (\d\d)/i.test(cellContent)){
+    return dD_Mmm_YyStringToDate(cellContent).valueOf();
+  } else {
+    return BLANK_DATE.valueOf();
+  }
+}
+function sortTable(tableID, column){
+  var table = document.getElementById(tableID).tBodies[0], 
+    store=[],
+    i, row, sortnr;
+  for (i = 0; i<table.rows.length; i++){
+    row = table.rows[i];
+    sortnr = getCellSortValue(row.cells[column].textContent);
+    store.push([sortnr, row]);
+  }
+  store.sort(function(a,b){
+      return a[0] > b[0] ? 1 : -1;
+  });
+  for (i=0; i<store.length; i++){
+    table.appendChild(store[i][1]);
+  }
+  store = null;
+}
 /**
  * Finds all DOM elements of class "due" and colors them yellow or red if applicable.  Dates that are past turn red, dates that are coming due within the warning date turn yellow.  This is accomplished using the Bootstrap classes "text-danger" (red) and "text-warning" (yellow).
  * @param {Date} warnDate - Dates between now and the warnDate will be colored yellow (given the Bootstrap "text-warning" class).
@@ -242,7 +265,7 @@ function colorize(warnDate) {
     .removeClass("text-danger text-warning");
   var xDate;
   $(".due")
-    .addClass((index) => {
+    .addClass(function (index) {
       xDate = dD_Mmm_YyStringToDate($(".due")[index].textContent);
       if (xDate <= Date.now()) {
         return "text-danger";
@@ -803,29 +826,25 @@ function getTaskNameFromId(input) {
     return "";
   }
 }
-
 /**
  * Take an XML string and remove all tags and whitespace.
  * @param {string} xmlIn - the XML string to be cleansed
  * @returns {string} - a string of tokens separated by a single whitespace.
  */
-function cleanseXml(xmlIn){
-  return xmlIn.replace(/(<\/?[a-zA-Z]*\/?>)|\n+/ig, " ").replace(/\s{2,}/ig, " ");
+function cleanseXml(xmlIn) {
+  return xmlIn.replace(/(<\/?[a-zA-Z]*\/?>)|\n+/ig, " ")
+    .replace(/\s{2,}/ig, " ");
 }
 
 function printCurrencies(xml, taskIds, showPha, showRobd) {
-  var dateTds, taskId, re, currName, pilotArr;
+  var datesText, taskId, re, currName, pilotArr;
   var htmlOut = "";
   xml = cleanseXml(xml);
-  /* Slice the xml into an array of pilots.  Each array member contains from
-  the first time that pilot's name is mentioned to the page number declaration
-  on the last page that has their name.  Read up on greedy vs. reluctant to
-  see how it works and use https://regexper.com to visualize it. */
   pilotArr = xml.match(/NAME: ([a-zA-Z'-]+) ?,[^]*NAME: \1[^]*?PAGE/gi);
   for (var i = 0; i < pilotArr.length; i++) {
     currName = pilotArr[i].replace(/NAME: ([a-zA-Z'-]+) ?,[^]*NAME: \1[^]*?PAGE/i, "$1");
     /* Print the current pilot's name to the top of his/her currency table. */
-    htmlOut += "<table class=\"table table-bordered table-sm\">" + "<thead class=\"thead-inverse\">" + "<tr>" +
+    htmlOut += "<table class=\"table table-bordered table-sm table-hover table-condensed\">" + "<thead class=\"thead-inverse\">" + "<tr>" +
       "<td colspan=\"3\">" + "<h3 class=\"text-center\">" + currName + "</h3>" + "</td></tr>" + "<tr>" +
       "<th>TASK NAME</th>" + "<th>DATE LAST ACCOMP</th>" + "<th>DATE DUE</th>" + "</tr></thead><tbody>";
     /* "PHYSICAL DUE DATE" & "PHYSIOLOGICAL..." are special cases due to how
@@ -856,22 +875,20 @@ function printCurrencies(xml, taskIds, showPha, showRobd) {
         up to the next task id it finds (two letters + two numbers, + optional 
         third letter) */
         re = new RegExp(taskId + "[^]*?([A-Z]{2}[0-9]{2}[A-Z]?|$)", "i");
-        /* dateTds = a chunk of text starting with the task name and ending with the next
+        /* datesText = a chunk of text starting with the task name and ending with the next
         task id it finds (actual example: "AE03 0 5 30 NOV 16 29 JAN 17 I A-10 
         CMR INEXP-1 TOT APPS AP00").  This will be a much longer string if the task
         name you're looking for is the last one on the page. */
-        /* console.log("i = " + i);
-        console.log("j = " + j);
-        console.log("currPilot = " + currName);
-        console.log("attempting to match re = " + re + " in pilotArr[" + i + "] = " + pilotArr[i]); */
-        dateTds = pilotArr[i].match(re)[0];
+        datesText = pilotArr[i].match(re)[0].replace(/([^]*)PAGE[^]*$/i,"$1");
         /* IF ... the block of the text contains a date of format "DD MMM YY" followed one space
         later by a single letter*/
-        if (/ \d\d (JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC) \d\d ([A-Z]|YES [A-Z]) /i.test(dateTds)) {
-          dateTds = dateTds.replace(/(^[^]*?\d\d (JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC) \d\d [A-Z]) [^]*$/i,
-            "$1");
-          var dateArr = dateTds.match(/\d\d (JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC) \d\d/g);
-          if (dateArr.length === 1) {
+        if (/ \d\d (JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC) \d\d ([A-Z]|YES [A-Z]) /i.test(datesText)) {
+          datesText = datesText.replace(
+            /(^[^]*?\d\d (JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC) \d\d [A-Z]) [^]*$/i, "$1");
+          var dateArr = datesText.match(/\d\d (JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC) \d\d/g);
+          if (dateArr.length === 0) {
+            htmlOut += "<tr><td>" + getTaskNameFromId(taskId) + " (" + taskId + ")</td><td></td><td></td></tr>";
+          } else if (dateArr.length === 1) {
             htmlOut += "<tr><td>" + getTaskNameFromId(taskId) + " (" + taskId + ")</td><td>" + dateArr[0] +
               "</td><td></td></tr>";
           } else if (dateArr.length === 2) {
@@ -879,11 +896,107 @@ function printCurrencies(xml, taskIds, showPha, showRobd) {
               "</td><td class=\"due\">" + dateArr[1] + "</td></tr>";
           }
         }
+      } else {
+        htmlOut += "<tr><td>" + getTaskNameFromId(taskId) + " (" + taskId + ")</td><td></td><td></td></tr>";
       }
     }
     htmlOut += "</tbody><tfoot class=\"small\"></tfoot></table>";
   }
   $("#fileDisplayArea")[0].innerHTML = htmlOut;
+  colorize(NOW_PLUS_X_DAYS($("#cautionSlider")[0].value));
+}
+
+function printCurrenciesDotMode(xml, taskIds, showPha, showRobd) {
+  var i, j, datesText, taskId, re, currName, pilotArr;
+  var htmlOut = "";
+  xml = cleanseXml(xml);
+  pilotArr = xml.match(/NAME: ([a-zA-Z'-]+) ?,[^]*NAME: \1[^]*?PAGE/gi);
+  htmlOut += "<table class=\"table table-bordered table-sm table-hover table-condensed DOT-table\" id=\"dotTable\"><thead><tr id=\"taskIdRow\"><th></th>";
+  for (i = 0; i < taskIds.length; i++) {
+    htmlOut += "<th class=\"text-center\" id=" + taskIds[i] + ">" + getTaskNameFromId(taskIds[i]) + "<br>(<a href=#>" + taskIds[i] + "</a>)</th>";
+  }
+  if (showPha) {
+    htmlOut += "<th class=\"text-center\" id=\"PHA\"><a href=#>PHA</a></th>";
+  }
+  if (showRobd) {
+    htmlOut += "<th class=\"text-center\" id=\"ROBD\"><a href=#>ROBD</a></th>";
+  }
+  htmlOut += "</tr></thead><tbody>";
+  for (i = 0; i < pilotArr.length; i++) {
+    currName = pilotArr[i].replace(/NAME: ([a-zA-Z'-]+) ?,[^]*NAME: \1[^]*?PAGE/i, "$1");
+    /* Print the current pilot's name at the beginning of their row */
+    htmlOut += "<tr><td>" + currName + "</td>";
+    for (j = 0; j < taskIds.length; j++) {
+      taskId = taskIds[j];
+      re = new RegExp(taskId, "i");
+      /* IF ... the current task name is even found in the current
+      pilot's ITS */
+      if (re.test(pilotArr[i])) {
+        /* Here's the tricky part - finding the TASK ID and extracting the DATE LAST ACCOMP and DATE DUE.  The challenge is that there can be 0, 1, or 2 dates present.  We're going to assume that if there's only one date it's the DATE LAST ACCOMP and doesn't have a DUE DATE. he regex we use looks for the task name, and captures everything up to the next task id it finds (two letters + two numbers, + optional third letter) */
+        re = new RegExp(taskId + "[^]*?([A-Z]{2}[0-9]{2}[A-Z]?|$)", "i");
+        /* datesText = a chunk of text starting with the task name and ending with the next task id it finds (actual example: "AE03 0 5 30 NOV 16 29 JAN 17 I A-10 CMR INEXP-1 TOT APPS AP00").  This will be a much longer string if the task name you're looking for is the last one on the page. */
+        datesText = pilotArr[i].match(re)[0].replace(/([^]*)PAGE[^]*$/i,"$1");
+        /* IF ... the block of the text contains a date of format "DD MMM YY" followed one space
+        later by a single letter*/
+        if (/ \d\d (JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC) \d\d ([A-Z]|YES [A-Z]) /i.test(datesText)) {
+          var dateArr = datesText.match(/\d\d (JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC) \d\d/g);
+          switch (dateArr.length) {
+          case 1:
+            htmlOut += "<td class=\"acc text-center\">" + dateArr[0] + "</td>";
+            break;
+          case 2:
+            htmlOut += "<td class=\"due text-center\">" + dateArr[1] + "</td>";
+            break;
+          default:
+            break;
+          }
+        } else {
+          htmlOut += "<td></td>"; //task is listed on ITS but there is no date
+        }
+      } else {
+        htmlOut += "<td></td>"; //task is not listed on ITS
+      }
+    }
+    /* "PHYSICAL DUE DATE" & "PHYSIOLOGICAL..." are special cases due to how they are placed on the page.  Can turn on/off their inclusion using the SHOW_PHA and SHOW_ROBD constants. */
+    if (showPha) {
+      htmlOut += /NAME[^]*(PHYSICAL) DUE DATE: (\d\d [A-Z]{3} \d\d)?[^]*?PAGE/i.test(pilotArr[i]) ? 
+      pilotArr[i].replace(/NAME[^]*(PHYSICAL) DUE DATE: (\d\d [A-Z]{3} \d\d)?[^]*?PAGE/i, "<td class=\"due\">$2</td>") : 
+      "<td class=\"due text-center\"></td>";
+    }
+    if (showRobd) {
+      htmlOut += /NAME[^]*(PHYSIOLOGICAL) DUE DATE: (\d\d [A-Z]{3} \d\d)?[^]*?PAGE/i.test(pilotArr[i]) ? 
+      pilotArr[i].replace(/NAME[^]*(PHYSIOLOGICAL) DUE DATE: (\d\d [A-Z]{3} \d\d)?[^]*?PAGE/i, "<td class=\"due\">$2</td>") :
+      "<td class=\"due text-center\"></td>";
+    }
+    htmlOut += "</tr>";
+  }
+  htmlOut += "</tbody><tfoot class=\"small\"></tfoot></table>";
+  $("#fileDisplayArea")[0].innerHTML = htmlOut;
+  
+  for (i=0; i<taskIds.length; i++){
+    document.getElementById(taskIds[i]).addEventListener("click",function(ev){
+      sortTable("dotTable", this.cellIndex);
+      ev.preventDefault();
+      ev.stopPropagation();
+      return false;
+    });
+  }
+  if (showPha){
+    document.getElementById("PHA").addEventListener("click", function(ev){
+      sortTable("dotTable", taskIds.length + 1);
+      ev.preventDefault();
+      ev.stopPropagation();
+      return false;
+    });
+  }
+  if (showRobd){
+    document.getElementById("ROBD").addEventListener("click", function(ev){
+      sortTable("dotTable", taskIds.length + 2);
+      ev.preventDefault();
+      ev.stopPropagation();
+      return false;
+    });
+  }
   colorize(NOW_PLUS_X_DAYS($("#cautionSlider")[0].value));
 }
 
@@ -894,29 +1007,31 @@ function makeBtns(xml) {
     "<button type=\"button\" class=\"btn btn-secondary\" id=\"cmrBtn\">CMR</button>" +
     "<button type=\"button\" class=\"btn btn-secondary\" id=\"ntBtn\">Night</button>" +
     "<button type=\"button\" class=\"btn btn-secondary\" id=\"allBtn\">ALL</button>";
-  $("#opsBtn")[0].addEventListener("click", () => {
+  $("#opsBtn")[0].addEventListener("click", function () {
     printCurrencies(xml, OPS_TASK_IDS, false, false);
   });
-  $("#gngBtn")[0].addEventListener("click", () => {
+  $("#gngBtn")[0].addEventListener("click", function () {
     printCurrencies(xml, GNG_TASK_IDS, true, true);
   });
-  $("#cmrBtn")[0].addEventListener("click", () => {
-    printCurrencies(xml, CMR_TASK_IDS, true, true);
+  $("#cmrBtn")[0].addEventListener("click", function () {
+    printCurrenciesDotMode(xml, CMR_TASK_IDS, true, true);
   });
-  $("#ntBtn")[0].addEventListener("click", () =>{
-    printCurrencies(xml, NT_TASK_IDS, false, false);
+  $("#ntBtn")[0].addEventListener("click", function () {
+    printCurrenciesDotMode(xml, NT_TASK_IDS, false, false);
   });
-  $("#allBtn")[0].addEventListener("click", () => {
+  $("#allBtn")[0].addEventListener("click", function () {
     printCurrencies(xml, getAllTaskIds(xml), true, true);
   });
 }
 
-function getPreparedDateFromXml(xml){
+function getPreparedDateFromXml(xml) {
   var re = /PREPARED \d\d (JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC) \d{4}/gi;
-  if (re.test(cleanseXml(xml))){
-    return cleanseXml(xml).match(re)[0].replace(/PREPARED /i, "retrieved from ARMS ");
+  if (re.test(cleanseXml(xml))) {
+    return cleanseXml(xml)
+      .match(re)[0].replace(/PREPARED /i, "retrieved from ARMS ")
+      .replace(/\d\d(\d\d)/, "$1");
   } else {
-    return "unknown";
+    return "???";
   }
 }
 
@@ -935,21 +1050,28 @@ function makeSlider() {
     colorize(NOW_PLUS_X_DAYS($("#cautionSlider")[0].value));
   });
 }
+
 $("#fileInput")[0].addEventListener("change", function () {
   if (this.files[0].type.match(/text.*/)) {
     var file = this.files[0];
     var reader = new FileReader();
     reader.onload = function () {
-      $("#fileData")[0].innerHTML = "File Name: " + file.name + "<br>File Type: " + file.type + "<br>Last Modified: " + dateToDd_Mmm_YyString(file.lastModifiedDate) + "<br>File Size: " + (file.size / 1048576).toFixed(3) + "MB";
+      $("#fileData")[0].innerHTML = "File Name: " + file.name + "<br>File Type: " + file.type +
+        "<br>Last Modified: " + dateToDd_Mmm_YyString(file.lastModifiedDate) + "<br>File Size: " + (file.size /
+          1048576)
+        .toFixed(3) + "MB";
       $("#mainHeader")[0].innerHTML += "<p class=\"small\">*ITS " + getPreparedDateFromXml(reader.result) +
         "</p>";
-      $("#fileInputJumbotron").attr("hidden", true);
+      $("#fileInputJumbotron")
+        .attr("hidden", true);
       /* TODO: store reader.result somewhere useful (<div id="rawXml" hidden><p>raw xml</p></div>?) 
-      http://api.jquery.com/data/
+      http://api.jquery.com/data/. This should allow uploading a second xml file which can then be 
+      appended to the first so two squadrons' reports can be combined (e.g. for 74th/75th/76th TFI).
       */
       makeSlider();
       makeBtns(reader.result);
-      printCurrencies(reader.result, OPS_TASK_IDS);
+      //printCurrencies(reader.result, OPS_TASK_IDS, false, false);
+      printCurrenciesDotMode(reader.result, CMR_TASK_IDS,true,true);
     };
     reader.readAsText(file);
   } else {
