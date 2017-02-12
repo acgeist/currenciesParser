@@ -1,42 +1,4 @@
-﻿<!--
-TODO:
--Night sched report that prints out: [pilots who are out of demanding], [pilots out of NVG event], [pilots expiring on NVG demanding within __ days]
--Add progress bar for processing? http://devdocs.io/html/element/progress
--Allow users to add custom task names/ids/subsets
--beautify code
--Make welcome page from which users can go to a specific platform/RTM or the generic one.
--Write tests for all functions
--Extract used portions of bootstrap?
--Log usage?
--dtd/strict schema?
--install eslint
--Clean up formatting/layout so it's less crowded at the top of the page
--Make each pilot's table collapse?
--sanitize an ITS to use as an example
--Don't show pilot if no tasks are found.
--Decide how to show tasks where accomplishment matters but due dates don't (e.g. SS01).
--Store tasks in a big JSON file/couchDB?
--Add RTM info to main page.
--Add ASCII Art/version info
--Clean up file structure\
--Enable uploading multiple files (e.g. 74th + 76th)?
--AWS CLI script for uploading new versions
--Get unit from ITS/show appropriate patch?
--Change generic page to show all task IDs as default
--Link  to alt gonker?
--Include example picture under file selection jumbotron
--troubleshoot jstester.js
--get SHA2 (wildcard?) certificate
-https://blogs.msdn.microsoft.com/saurabh_singh/2007/11/07/you-get-a-security
--alert-when-you-try-to-access-an-ssl-enabled-web-site-when-certificate-has-b
-een-issued-by-an-internal-root-ca/
--incorporate task ID definitions/explanations from vol 1 attachment 3 and
-RTM (JSON?)
--1C0 go-no go checklist/incorporate IDS?
--"Freeze panes" equivalent?
--Fix "accomplished" vs. "due"
--->
-<!doctype html>
+﻿<!doctype html>
 <html lang="en-US">
 
 <head>
@@ -46,17 +8,14 @@ RTM (JSON?)
   <meta name="keywords" content="ITS, Oracle, DOT, currencies, ARM, ARMS, SARM, 1C0">
   <meta name="author" content="Andrew Geist">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <!-- favicon from https://commons.wikimedia.org/wiki/File:GAU-8A_Avenger_Gatling_gun_front.jpg 
-  (modified using http://www.favicon-generator.org/) -->
-  <link rel="shortcut icon" type="image/x-icon" href="/images/favicon.ico" />
+  <link rel="shortcut icon" type="image/x-icon" href="images/favicon.ico" />
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ"
     crossorigin="anonymous" />
   <link rel="stylesheet" href="styles/style.css" /> </head>
 
 <body>
-    <div class="page-header" id="mainHeader">
-      <h1>
-        <p class="text-center">A-10C Currencies Checker</p>
+  <div class="page-header" id="mainHeader">
+        <h1 class="text-center">A-10C Currencies Checker</h1>
         <div id = "sqPatches">
         <img alt="25FS Patch"   class = "sqPatchImg" src="images/25fs.png"/>
         <img alt="47FS Patch"   class = "sqPatchImg" src="images/47fs.png"/>
@@ -73,24 +32,22 @@ RTM (JSON?)
         <img alt="357FS Patch"  class = "sqPatchImg" src="images/357fs.png"/>
         <img alt="358FS Patch"  class = "sqPatchImg" src="images/358fs.png"/>
         <img alt="422TES Patch" class = "sqPatchImg" src="images/422tes.png"/>
-        <!-- to add: AATC? -->
-      </div>
-    </h1> 
+      </div> </div>
+  <div class="jumbotron" id="fileInputJumbotron"> <input type="file" id="fileInput" accept="application/xml">
+    <p>Ask your unit's SARM/1C0s to pull an ITS for all the unit's pilots in .pdf format from ARMS. Open the .pdf and "save
+      as" XML. This "ITS.XML" file is what you should be uploading here.</p>
   </div>
-    <div class="jumbotron" id="fileInputJumbotron"> <input type="file" id="fileInput" accept="application/xml">
-      <p>Ask your unit's SARM/1C0s to pull an ITS for all the unit's pilots in .pdf format from ARMS. Open the .pdf and "save as" XML. This "ITS.XML" file is what you should be uploading here.</p>
-    </div>
-    <div id="fileData" hidden></div> <span id="sliderDiv"></span>
-    <div id="topRowBtns"></div><br>
-    <div id="fileDisplayArea"></div>
-    <!--************************SCRIPTS*********************-->
-    <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n"
+  <div id="fileData" hidden></div> <span id="sliderDiv"></span>
+  <div id="topRowBtns"></div><br>
+  <div id="fileDisplayArea"></div>
+  <!--************************SCRIPTS*********************-->
+  <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n"
+    crossorigin="anonymous"></script>
+    <script src="scripts/parser.js" type="text/javascript"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb"
       crossorigin="anonymous"></script>
-      <script src="scripts/parser.js" type="text/javascript"></script>
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb"
+      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn"
         crossorigin="anonymous"></script>
-        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn"
-          crossorigin="anonymous"></script>
 </body>
 
 </html>

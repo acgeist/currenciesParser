@@ -1,7 +1,10 @@
 th{
   vertical-align: text-top;
 }
-.DOT-table{
+.cell-blank{
+  background-color: red; 
+}
+.DOT-table {
   font-size: .74em;
   line-height: 1;
 }
@@ -10,7 +13,7 @@ th{
   margin-right: 10%;
   margin-top: 2%;
 }
-.jumbotron, #topRowBtns, #fileDisplayArea, #sliderDiv, #cautionSlider {
+.jumbotron, #topRowBtns, #sliderDiv, #cautionSlider, #fileDisplayArea{
   margin-left: 3%;
   margin-right: 3%;
 }

@@ -1,0 +1,38 @@
+TODO:
+-Night sched report that prints out: [pilots who are out of demanding], [pilots out of NVG event], [pilots expiring on NVG demanding within __ days]
+-Add progress bar for processing? http://devdocs.io/html/element/progress
+-Allow users to add custom task names/ids/subsets
+-beautify code
+-Make welcome page from which users can go to a specific platform/RTM or the generic one.
+-Write tests for all functions
+-Extract used portions of bootstrap?
+-Log usage?
+-dtd/strict schema?
+-install eslint
+-Clean up formatting/layout so it's less crowded at the top of the page
+-Make each pilot's table collapse?
+-sanitize an ITS to use as an example
+-Don't show pilot if no tasks are found.
+-Decide how to show tasks where accomplishment matters but due dates don't (e.g. SS01).
+-Store tasks in a big JSON file/couchDB?
+-Add RTM info to main page.
+-Add ASCII Art/version info
+-Clean up file structure\
+-Enable uploading multiple files (e.g. 74th + 76th)?
+-AWS CLI script for uploading new versions
+-Get unit from ITS/show appropriate patch?
+-Change generic page to show all task IDs as default
+-Link  to alt gonker?
+-Include example picture under file selection jumbotron
+-troubleshoot jstester.js
+-get SHA2 (wildcard?) certificate
+https://blogs.msdn.microsoft.com/saurabh_singh/2007/11/07/you-get-a-security
+-alert-when-you-try-to-access-an-ssl-enabled-web-site-when-certificate-has-b
+een-issued-by-an-internal-root-ca/
+-incorporate task ID definitions/explanations from vol 1 attachment 3 and
+RTM (JSON?)
+-1C0 go-no go checklist/incorporate IDS?
+-"Freeze panes" equivalent?
+-Fix "accomplished" vs. "due"
+-On CMR tab, have a stoplight next to the name?
+-Make normal "printCurrencies" tables sortable.

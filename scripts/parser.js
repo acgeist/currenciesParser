@@ -10,9 +10,7 @@ const OPS_TASK_IDS = "AE03 AP01 AR01 AR02 GS03 LD01 LD04 LD19 LE00 LE06 SX06 TO0
  * @constant GNG_TASK_IDS
  * @type {string[]} 
  * @default */
-//const GNG_TASK_IDS = ["AA03", "AA21", "GA02", "GA06", "GS03", "GS06", "LL01", "LL02", "LL07", "MT17", "PP12", "SS01",
-//  "SS06"
-//];
+
 const GNG_TASK_IDS = "AA03 AA21 GA02 GA06 GS03 GS06 LL01 LL02 LL07 MT17 PP12 SS01 SS06".split(" ");
 /** 
  * List of task IDs that affect CMR status for A-10 pilots.  List excludes:
@@ -53,8 +51,6 @@ const NT_TASK_IDS = ["TE01", "VV02"];
  * monthAbbrToNum(undefined);                   // returns -1
  * monthAbbrToNum(true);                        // returns -1
  */
-
-const BLANK_DATE = new Date(9999,11,31);
 
 function monthAbbrToNum(input, isZeroSubscript) {
   isZeroSubscript = arguments.length === 1 ? false : isZeroSubscript;
@@ -197,6 +193,13 @@ function monthAbbrToNum(input, isZeroSubscript) {
   return output;
 } */
 /**
+ * Placeholder data far in the future (useful for sorting).
+ * @constant BLANK_DATE
+ * @type {Date}
+ * @default
+ */
+const BLANK_DATE = new Date(9999,11,31);
+/**
  * Returns a date object representing the current time plus a given number of days.
  * @param {number} numDays - how many days to add to the current time
  * @returns {Date} a Date object representing the current time plus a given number of days.
@@ -206,7 +209,7 @@ function NOW_PLUS_X_DAYS(numDays) {
     .valueOf() + numDays * 24 * 60 * 60 * 1000);
 }
 /**
- * Converts a string of form "DD MMM YY" to a Date object.
+ * Converts a string of form "DD MMM YY" to a Date object.  Because it only takes in a two-digit year (YY vice YYYY), the function assumes the date is between 1951 and 2050.
  * @param {string} ddMmmYy - the string to convert
  * @returns {Date} a Date object representing the input string
  */
@@ -217,8 +220,8 @@ function dD_Mmm_YyStringToDate(ddMmmYy) {
   accomplishes roughly the same thing as ParseInt("42", 10). */
   /*TODO: see if this can be written using only one "replace" */
   /*http://stackoverflow.com/questions/3446170/escape-string-for-use-in-javascript-regex/6969486#6969486*/
-  var re = /(\d\d) (JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC) (\d\d)/i;
-  var century = +ddMmmYy.replace(re, "$3") > 50 ? 1900 : 2000; // Assumes the only dates entered will be between 1950 and 2049.
+  var re = /(\d\d?) (JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC) (\d\d)/i;
+  var century = +ddMmmYy.replace(re, "$3") > 50 ? 1900 : 2000; // Assumes the only dates entered will be between 1951 and 2050.
   return new Date(+ddMmmYy.replace(re, "$3") + century, monthAbbrToNum(ddMmmYy.replace(re, "$2"), true), +ddMmmYy.replace(
     re, "$1"));
 }
@@ -232,26 +235,37 @@ function dateToDd_Mmm_YyString(dateIn) {
     .toUpperCase()
     .replace(/.*([A-Z]{3}) (\d\d) \d\d(\d\d).*/i, "$2 $1 $3");
 }
+
+/**
+ * Used for comparing a cell containing a string matching the format "DD MMM YY" to a blank cell.
+ * @param {string} cellContent - the cell's contents
+ * @returns {Date} - either a date object equivalent to what the string represents, or a date well in the future for blank cells
+ */
 function getCellSortValue(cellContent){
-  if (/(\d\d) (JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC) (\d\d)/i.test(cellContent)){
-    return dD_Mmm_YyStringToDate(cellContent).valueOf();
-  } else {
-    return BLANK_DATE.valueOf();
-  }
+  return /\d\d (JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC) \d\d/i.test(cellContent) ?
+    dD_Mmm_YyStringToDate(cellContent).valueOf() :
+    BLANK_DATE.valueOf();
 }
-function sortTable(tableID, column){
+
+/**
+ * Sorts a table by a given column.  As currently written this method is not robust and assumes that the cell contents are either a string representing a date (of format "DD MMM YY") or a name.
+ * @param {string} tableId - the HTML id of the table being sorted
+ * @param {number} column - the column number the table is being sorted by
+ * @param {boolean} [isAlphabetic=false] - true = sort names, false = sort dates
+ */
+function sortTable(tableID, column, isAlphabetic){
+  isAlphabetic = arguments.length > 2 ? isAlphabetic : false;
   var table = document.getElementById(tableID).tBodies[0], 
-    store=[],
-    i, row, sortnr;
-  for (i = 0; i<table.rows.length; i++){
-    row = table.rows[i];
-    sortnr = getCellSortValue(row.cells[column].textContent);
-    store.push([sortnr, row]);
-  }
+    store=[];
+  store = Array.prototype.slice.call(table.rows).map(function(row){
+    return isAlphabetic ? 
+      [row.cells[column].textContent, row] : 
+      [getCellSortValue(row.cells[column].textContent), row];
+  });
   store.sort(function(a,b){
       return a[0] > b[0] ? 1 : -1;
   });
-  for (i=0; i<store.length; i++){
+  for (let i = 0; i < store.length; i++){
     table.appendChild(store[i][1]);
   }
   store = null;
@@ -273,6 +287,12 @@ function colorize(warnDate) {
         return "text-warning";
       }
     });
+  $(".acc").removeClass("cell-blank");
+  $(".acc").addClass(function (index){
+    if ($(".acc")[index].textContent === ""){
+      return "cell-blank";
+    }
+  });
 }
 /**
  *  Generates a list of all the unique task ids found in an xml string and return the list as an array of strings.  This is accomplished by using regular expressions to remove tags and whitespace, then search for a character sequence matching <code>/ [A-Z]{2}\d{2}[A-Z]? /gi</code>
@@ -844,12 +864,11 @@ function printCurrencies(xml, taskIds, showPha, showRobd) {
   for (var i = 0; i < pilotArr.length; i++) {
     currName = pilotArr[i].replace(/NAME: ([a-zA-Z'-]+) ?,[^]*NAME: \1[^]*?PAGE/i, "$1");
     /* Print the current pilot's name to the top of his/her currency table. */
-    htmlOut += "<table class=\"table table-bordered table-sm table-hover table-condensed\">" + "<thead class=\"thead-inverse\">" + "<tr>" +
+    htmlOut += "<table id=\"" + currName + "\"class=\"table table-bordered table-sm table-hover table-condensed\">" + "<thead class=\"thead-inverse\">" + "<tr>" +
       "<td colspan=\"3\">" + "<h3 class=\"text-center\">" + currName + "</h3>" + "</td></tr>" + "<tr>" +
       "<th>TASK NAME</th>" + "<th>DATE LAST ACCOMP</th>" + "<th>DATE DUE</th>" + "</tr></thead><tbody>";
     /* "PHYSICAL DUE DATE" & "PHYSIOLOGICAL..." are special cases due to how
-    they are placed on the page.  Can turn on/off their inclusion in each
-    pilot's list of currencies using the SHOW_PHA and SHOW_ROBD constants. */
+    they are placed on the page.  */
     if (showPha) {
       htmlOut += "<tr>" + pilotArr[i].replace(/NAME[^]*(PHYSICAL) DUE DATE: (\d\d [A-Z]{3} \d\d)?[^]*?PAGE/i,
         "<td>PHA</td><td></td><td class=\"due\">$2</td>") + "</tr>";
@@ -903,6 +922,7 @@ function printCurrencies(xml, taskIds, showPha, showRobd) {
     htmlOut += "</tbody><tfoot class=\"small\"></tfoot></table>";
   }
   $("#fileDisplayArea")[0].innerHTML = htmlOut;
+
   colorize(NOW_PLUS_X_DAYS($("#cautionSlider")[0].value));
 }
 
@@ -911,9 +931,9 @@ function printCurrenciesDotMode(xml, taskIds, showPha, showRobd) {
   var htmlOut = "";
   xml = cleanseXml(xml);
   pilotArr = xml.match(/NAME: ([a-zA-Z'-]+) ?,[^]*NAME: \1[^]*?PAGE/gi);
-  htmlOut += "<table class=\"table table-bordered table-sm table-hover table-condensed DOT-table\" id=\"dotTable\"><thead><tr id=\"taskIdRow\"><th></th>";
-  for (i = 0; i < taskIds.length; i++) {
-    htmlOut += "<th class=\"text-center\" id=" + taskIds[i] + ">" + getTaskNameFromId(taskIds[i]) + "<br>(<a href=#>" + taskIds[i] + "</a>)</th>";
+  htmlOut += "<table class=\"table table-bordered table-sm table-hover table-condensed DOT-table\" id=\"dotTable\"><thead><tr id=\"taskIdRow\"><th id=\"pilot\"><a href=#>PILOT</a></th>";
+  for (i=0; i<taskIds.length; i++){
+    htmlOut += "<th class=\"text-center\" id=" + taskIds[i] + ">" + getTaskNameFromId(taskIds[i]) + "<br>(<a href=#>" + taskIds[i] + "</a>)</th>";    
   }
   if (showPha) {
     htmlOut += "<th class=\"text-center\" id=\"PHA\"><a href=#>PHA</a></th>";
@@ -951,10 +971,10 @@ function printCurrenciesDotMode(xml, taskIds, showPha, showRobd) {
             break;
           }
         } else {
-          htmlOut += "<td></td>"; //task is listed on ITS but there is no date
+          htmlOut += "<td class=\"acc\"></td>"; //task is listed on ITS but there is no date
         }
       } else {
-        htmlOut += "<td></td>"; //task is not listed on ITS
+        htmlOut += "<td class=\"acc\"></td>"; //task is not listed on ITS
       }
     }
     /* "PHYSICAL DUE DATE" & "PHYSIOLOGICAL..." are special cases due to how they are placed on the page.  Can turn on/off their inclusion using the SHOW_PHA and SHOW_ROBD constants. */
@@ -972,32 +992,28 @@ function printCurrenciesDotMode(xml, taskIds, showPha, showRobd) {
   }
   htmlOut += "</tbody><tfoot class=\"small\"></tfoot></table>";
   $("#fileDisplayArea")[0].innerHTML = htmlOut;
-  
-  for (i=0; i<taskIds.length; i++){
-    document.getElementById(taskIds[i]).addEventListener("click",function(ev){
-      sortTable("dotTable", this.cellIndex);
-      ev.preventDefault();
-      ev.stopPropagation();
-      return false;
-    });
+
+  addTableSortListener("pilot", "dotTable", true);
+  for (i = 0; i<taskIds.length; i++){
+    addTableSortListener(taskIds[i], "dotTable");
   }
   if (showPha){
-    document.getElementById("PHA").addEventListener("click", function(ev){
-      sortTable("dotTable", taskIds.length + 1);
-      ev.preventDefault();
-      ev.stopPropagation();
-      return false;
-    });
+    addTableSortListener("PHA", "dotTable");
   }
   if (showRobd){
-    document.getElementById("ROBD").addEventListener("click", function(ev){
-      sortTable("dotTable", taskIds.length + 2);
-      ev.preventDefault();
-      ev.stopPropagation();
-      return false;
-    });
+    addTableSortListener("ROBD", "dotTable");
   }
   colorize(NOW_PLUS_X_DAYS($("#cautionSlider")[0].value));
+}
+
+function addTableSortListener(colId, tableId, alphabetic){
+  alphabetic = arguments.length > 2 ? alphabetic : false;
+  document.getElementById(colId).addEventListener("click", function (event){
+    sortTable(tableId, this.cellIndex, alphabetic);
+    event.preventDefault();
+    event.stopPropagation();
+    return false;
+  })
 }
 
 function makeBtns(xml) {
@@ -1022,7 +1038,28 @@ function makeBtns(xml) {
   $("#allBtn")[0].addEventListener("click", function () {
     printCurrencies(xml, getAllTaskIds(xml), true, true);
   });
+  /*
+  makeBtn("opsBtn", "Ops Desk", xml, OPS_TASK_IDS, false, false);
+  makeBtn("gngBtn", "GO/NO-GO", xml, GNG_TASK_IDS, true, true);
+  makeBtn("cmrBtn", "CMR", xml, CMR_TASK_IDS, true, true, true);
+  makeBtn("ntBtn", "Night", xml, NT_TASK_IDS, false, false, true);
+  makeBtn("allBtn", "All Task IDs", xml, getAllTaskIds(xml), true, true);
+  */
 }
+
+/*
+function makeBtn(id, btnTxt, xml, taskArray, showPha, showRobd, useDotMode){
+  useDotMode = arguments.length > 6 ? useDotMode : false;
+  document.getElementById("topRowBtns").innerHTML += "<button type=\"button\" class=\"btn btn-secondary\" id=\"" + id + "\">" + btnTxt + "</button>";
+  document.getElementById(id).addEventListener("click", function(){
+    if (useDotMode){
+      printCurrenciesDotMode(xml, taskArray, showPha, showRobd);
+    } else {
+      printCurrencies(xml, taskArray, showPha, showRobd);
+    }
+  });
+}
+*/
 
 function getPreparedDateFromXml(xml) {
   var re = /PREPARED \d\d (JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC) \d{4}/gi;
@@ -1070,8 +1107,7 @@ $("#fileInput")[0].addEventListener("change", function () {
       */
       makeSlider();
       makeBtns(reader.result);
-      //printCurrencies(reader.result, OPS_TASK_IDS, false, false);
-      printCurrenciesDotMode(reader.result, CMR_TASK_IDS,true,true);
+      printCurrencies(reader.result, OPS_TASK_IDS, false, false);
     };
     reader.readAsText(file);
   } else {
