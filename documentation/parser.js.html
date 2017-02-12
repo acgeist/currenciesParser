@@ -281,7 +281,8 @@ function getCellSortValue(cellContent){
  * @param {number} column - the column number the table is being sorted by
  * @param {boolean} [isAlphabetic=false] - true = sort names, false = sort dates
  */
-function sortTable(tableID, column, isAlphabetic = false){
+function sortTable(tableID, column, isAlphabetic){
+  isAlphabetic = arguments.length > 2 ? isAlphabetic : false;
   var table = document.getElementById(tableID).tBodies[0], 
     store=[];
   store = Array.prototype.slice.call(table.rows).map(function(row){
@@ -292,8 +293,8 @@ function sortTable(tableID, column, isAlphabetic = false){
   store.sort(function(a,b){
       return a[0] > b[0] ? 1 : -1;
   });
-  for (const item of store){
-    table.appendChild(item[1]);
+  for (let i = 0; i &lt; store.length; i++){
+    table.appendChild(store[i][1]);
   }
   store = null;
 }
@@ -891,7 +892,7 @@ function printCurrencies(xml, taskIds, showPha, showRobd) {
   for (var i = 0; i &lt; pilotArr.length; i++) {
     currName = pilotArr[i].replace(/NAME: ([a-zA-Z'-]+) ?,[^]*NAME: \1[^]*?PAGE/i, "$1");
     /* Print the current pilot's name to the top of his/her currency table. */
-    htmlOut += "&lt;table class=\"table table-bordered table-sm table-hover table-condensed\">" + "&lt;thead class=\"thead-inverse\">" + "&lt;tr>" +
+    htmlOut += "&lt;table id=\"" + currName + "\"class=\"table table-bordered table-sm table-hover table-condensed\">" + "&lt;thead class=\"thead-inverse\">" + "&lt;tr>" +
       "&lt;td colspan=\"3\">" + "&lt;h3 class=\"text-center\">" + currName + "&lt;/h3>" + "&lt;/td>&lt;/tr>" + "&lt;tr>" +
       "&lt;th>TASK NAME&lt;/th>" + "&lt;th>DATE LAST ACCOMP&lt;/th>" + "&lt;th>DATE DUE&lt;/th>" + "&lt;/tr>&lt;/thead>&lt;tbody>";
     /* "PHYSICAL DUE DATE" &amp; "PHYSIOLOGICAL..." are special cases due to how
@@ -949,6 +950,7 @@ function printCurrencies(xml, taskIds, showPha, showRobd) {
     htmlOut += "&lt;/tbody>&lt;tfoot class=\"small\">&lt;/tfoot>&lt;/table>";
   }
   $("#fileDisplayArea")[0].innerHTML = htmlOut;
+
   colorize(NOW_PLUS_X_DAYS($("#cautionSlider")[0].value));
 }
 
@@ -958,8 +960,8 @@ function printCurrenciesDotMode(xml, taskIds, showPha, showRobd) {
   xml = cleanseXml(xml);
   pilotArr = xml.match(/NAME: ([a-zA-Z'-]+) ?,[^]*NAME: \1[^]*?PAGE/gi);
   htmlOut += "&lt;table class=\"table table-bordered table-sm table-hover table-condensed DOT-table\" id=\"dotTable\">&lt;thead>&lt;tr id=\"taskIdRow\">&lt;th id=\"pilot\">&lt;a href=#>PILOT&lt;/a>&lt;/th>";
-  for (const taskId of taskIds){
-    htmlOut += "&lt;th class=\"text-center\" id=" + taskId + ">" + getTaskNameFromId(taskId) + "&lt;br>(&lt;a href=#>" + taskId + "&lt;/a>)&lt;/th>";    
+  for (i=0; i&lt;taskIds.length; i++){
+    htmlOut += "&lt;th class=\"text-center\" id=" + taskIds[i] + ">" + getTaskNameFromId(taskIds[i]) + "&lt;br>(&lt;a href=#>" + taskIds[i] + "&lt;/a>)&lt;/th>";    
   }
   if (showPha) {
     htmlOut += "&lt;th class=\"text-center\" id=\"PHA\">&lt;a href=#>PHA&lt;/a>&lt;/th>";
@@ -1018,37 +1020,28 @@ function printCurrenciesDotMode(xml, taskIds, showPha, showRobd) {
   }
   htmlOut += "&lt;/tbody>&lt;tfoot class=\"small\">&lt;/tfoot>&lt;/table>";
   $("#fileDisplayArea")[0].innerHTML = htmlOut;
-  document.getElementById("pilot").addEventListener("click", function (ev){
-    sortTable("dotTable", this.cellIndex, true);
-    ev.preventDefault();
-    ev.stopPropagation();
-    return false;
-  });
-  for (i=0; i&lt;taskIds.length; i++){
-    document.getElementById(taskIds[i]).addEventListener("click", function(ev){
-      sortTable("dotTable", this.cellIndex);
-      ev.preventDefault();
-      ev.stopPropagation();
-      return false;
-    });
+
+  addTableSortListener("pilot", "dotTable", true);
+  for (i = 0; i&lt;taskIds.length; i++){
+    addTableSortListener(taskIds[i], "dotTable");
   }
   if (showPha){
-    document.getElementById("PHA").addEventListener("click", function(ev){
-      sortTable("dotTable", taskIds.length + 1);
-      ev.preventDefault();
-      ev.stopPropagation();
-      return false;
-    });
+    addTableSortListener("PHA", "dotTable");
   }
   if (showRobd){
-    document.getElementById("ROBD").addEventListener("click", function(ev){
-      sortTable("dotTable", taskIds.length + 2);
-      ev.preventDefault();
-      ev.stopPropagation();
-      return false;
-    });
+    addTableSortListener("ROBD", "dotTable");
   }
   colorize(NOW_PLUS_X_DAYS($("#cautionSlider")[0].value));
+}
+
+function addTableSortListener(colId, tableId, alphabetic){
+  alphabetic = arguments.length > 2 ? alphabetic : false;
+  document.getElementById(colId).addEventListener("click", function (event){
+    sortTable(tableId, this.cellIndex, alphabetic);
+    event.preventDefault();
+    event.stopPropagation();
+    return false;
+  })
 }
 
 function makeBtns(xml) {
@@ -1073,7 +1066,28 @@ function makeBtns(xml) {
   $("#allBtn")[0].addEventListener("click", function () {
     printCurrencies(xml, getAllTaskIds(xml), true, true);
   });
+  /*
+  makeBtn("opsBtn", "Ops Desk", xml, OPS_TASK_IDS, false, false);
+  makeBtn("gngBtn", "GO/NO-GO", xml, GNG_TASK_IDS, true, true);
+  makeBtn("cmrBtn", "CMR", xml, CMR_TASK_IDS, true, true, true);
+  makeBtn("ntBtn", "Night", xml, NT_TASK_IDS, false, false, true);
+  makeBtn("allBtn", "All Task IDs", xml, getAllTaskIds(xml), true, true);
+  */
 }
+
+/*
+function makeBtn(id, btnTxt, xml, taskArray, showPha, showRobd, useDotMode){
+  useDotMode = arguments.length > 6 ? useDotMode : false;
+  document.getElementById("topRowBtns").innerHTML += "&lt;button type=\"button\" class=\"btn btn-secondary\" id=\"" + id + "\">" + btnTxt + "&lt;/button>";
+  document.getElementById(id).addEventListener("click", function(){
+    if (useDotMode){
+      printCurrenciesDotMode(xml, taskArray, showPha, showRobd);
+    } else {
+      printCurrencies(xml, taskArray, showPha, showRobd);
+    }
+  });
+}
+*/
 
 function getPreparedDateFromXml(xml) {
   var re = /PREPARED \d\d (JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC) \d{4}/gi;
@@ -1122,7 +1136,6 @@ $("#fileInput")[0].addEventListener("change", function () {
       makeSlider();
       makeBtns(reader.result);
       printCurrencies(reader.result, OPS_TASK_IDS, false, false);
-      //printCurrenciesDotMode(reader.result, CMR_TASK_IDS,true,true);
     };
     reader.readAsText(file);
   } else {
@@ -1145,7 +1158,7 @@ $("#fileInput")[0].addEventListener("change", function () {
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Sat Feb 11 2017 17:04:27 GMT-0500 (Eastern Standard Time)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Sat Feb 11 2017 20:12:13 GMT-0500 (Eastern Standard Time)
 </footer>
 
 <script> prettyPrint(); </script>
